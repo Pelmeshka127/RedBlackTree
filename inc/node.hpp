@@ -15,17 +15,18 @@ enum Color
 
 //-------------------------------------------------------------------------------//
 
+template<typename KeyT>
 class Node 
 {
     public: 
-        int      key_;
+        KeyT     key_;
         Color    color_;
-        Node     *left_   = nullptr;
-        Node     *right_  = nullptr;
-        Node     *parent_ = nullptr;
+        Node<KeyT>     *left_   = nullptr;
+        Node<KeyT>     *right_  = nullptr;
+        Node<KeyT>     *parent_ = nullptr;
 
-    Node(const int& key = 0, const Color& color = Black, Node* left = nullptr,
-         Node* right = nullptr,  Node* parent = nullptr) : 
+    Node(const KeyT& key = 0, const Color& color = Black, Node<KeyT>* left = nullptr,
+         Node<KeyT>* right = nullptr,  Node<KeyT>* parent = nullptr) : 
          key_{key}, color_{color}, left_{left}, right_{right}, parent_{parent} {}
 
     ~Node() {}

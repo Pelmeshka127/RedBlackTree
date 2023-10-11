@@ -1,9 +1,9 @@
-#include "../inc/rbtree.hpp"
-#include "../inc/graphics.hpp"
+#include "rbtree.hpp"
+#include "graphics.hpp"
 
 int main(int argc, char** argv)
 {
-    RBTree tree;
+    RBTree<int> tree;
 
     tree.InsertKey(5);
 
