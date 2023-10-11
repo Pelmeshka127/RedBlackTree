@@ -14,7 +14,7 @@ int TreeDump(RBTree* const tree)
 {
     assert(tree);
 
-    graph_file = fopen("graphics/graph.dot", "w");
+    graph_file = fopen("../../graphics/graph.dot", "w");
     if (graph_file == nullptr)
     {
         std::cerr << "Failed openning graph file in " << __PRETTY_FUNCTION__ << std::endl;
@@ -24,10 +24,10 @@ int TreeDump(RBTree* const tree)
     fprintf(graph_file, "digraph Tree\n{\n");
     fprintf(graph_file, "   rankdir = HR;\n");
     fprintf(graph_file, "   node[fontsize=14];\n   edge[color=\"black\",fontcolor=\"blue\",fontsize=12];\n");
-    fprintf(graph_file, "   tree[shape = Mrecord, style = filled, fillcolor = \"aliceblue\", "
+    fprintf(graph_file, "   tree[shape = Mrecord, style = filled, fillcolor = \"chartreuse1\", "
                         "label = \"My Tree | size = %zu\"];\n", tree->Size());
     TreeDraw(tree->Root());
-    fprintf(graph_file, "   tree -> \"%p\" [color = \"red\"];\n", tree->Root());
+    fprintf(graph_file, "   tree -> \"%p\" [color = \"gray0\"];\n", tree->Root());
     fprintf(graph_file, "}");
 
     if (fclose(graph_file) == EOF)
@@ -38,7 +38,9 @@ int TreeDump(RBTree* const tree)
 
     char call_graph[100] = " ";
 
-    sprintf(call_graph, "dot graphics/graph.dot -Tpng -o graphics/graph%d.png", graph_num++);
+    // system("cd ../../");
+
+    sprintf(call_graph, "dot ../../graphics/graph.dot -Tpng -o ../../graphics/graph%d.png", graph_num++);
     
     system(call_graph);
 
@@ -64,10 +66,30 @@ void TreeDraw(Node* const node)
     }
 
     if (node->left_ != nullptr)
+    {
         fprintf(graph_file, "  \"%p\" -> \"%p\" [color = \"green\"];\n", node, node->left_);
+        fprintf(graph_file, "  \"%p\" -> \"%p\" [color = \"red\"];\n", node->left_, node->left_->parent_);
+    }
+
+    else if (node->left_ == nullptr)
+    {
+        fprintf(graph_file, "   \"%p%s\"[shape = Mrecord, style = filled, fontcolor = \"white\", fillcolor = \"black\","
+                            "   label = \" <value> %s\"];\n", node, "left", "nill");
+        fprintf(graph_file, "  \"%p\" -> \"%p%s\" [color = \"green\"];\n", node, node, "left");
+    }
 
     if (node->right_ != nullptr)
-        fprintf(graph_file, "  \"%p\" -> \"%p\" [color = \"red\"];\n", node, node->right_);
+    {
+        fprintf(graph_file, "  \"%p\" -> \"%p\" [color = \"green\"];\n", node, node->right_);
+        fprintf(graph_file, "  \"%p\" -> \"%p\" [color = \"red\"];\n", node->right_, node->right_->parent_);
+    }
+
+    else if (node->right_ == nullptr)
+    {
+        fprintf(graph_file, "   \"%p%s\"[shape = Mrecord, style = filled, fontcolor = \"white\", fillcolor = \"black\","
+                            "   label = \" <value> %s\"];\n", node, "right", "nill");
+        fprintf(graph_file, "  \"%p\" -> \"%p%s\" [color = \"green\"];\n", node, node, "right");
+    }
 
     if (node->left_ != nullptr)
         TreeDraw(node->left_);
