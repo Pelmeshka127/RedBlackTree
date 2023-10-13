@@ -3,6 +3,8 @@
 
 int main(int argc, char** argv)
 {
+    using namespace SearchTree;
+
     RBTree<int> tree;
 
     tree.InsertKey(5);
@@ -27,6 +29,10 @@ int main(int argc, char** argv)
 
     tree.InsertKey(3);
     
+    TreeDump(&tree);
+
+    tree.DeleteKey(3);
+
     TreeDump(&tree);
 
     return 0;

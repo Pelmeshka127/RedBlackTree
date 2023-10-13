@@ -5,15 +5,20 @@
 
 #include "node.hpp"
 
+namespace SearchTree
+{
+
 //-------------------------------------------------------------------------------//
 
 template<typename KeyT>
 class RBTree
 {
+    using node_type = Node<KeyT>;
+
     private:
         size_t size_ = 0;
 
-        Node<KeyT> *root_  = nullptr;
+        node_type *root_  = nullptr;
 
     public:
         RBTree() {};
@@ -24,28 +29,34 @@ class RBTree
 
         size_t Size() const;
 
-        Node<KeyT>*  Root() const;
+        node_type*  Root() const;
 
-        int InsertKey(int key);
+        int InsertKey(KeyT key);
 
-        int DeleteKey(int key);
+        int DeleteKey(KeyT key);
+
+        node_type* TreeSearch(KeyT key, node_type* root) const;
 
     private:
-        void LeftRotate(Node<KeyT>* rotated_node);
+        Node<KeyT>* TreeMinimum(node_type* node) const;
 
-        void RightRotate(Node<KeyT>* rotated_node);
+        Node<KeyT>* TreeMaximum(node_type* node) const;
 
-        void InsertNode(Node<KeyT>* node);
+        void LeftRotate(node_type* rotated_node);
 
-        void InsertFixUp(Node<KeyT>* node);
+        void RightRotate(node_type* rotated_node);
 
-        // void Transplant(Node<KeyT>* u, Node<KeyT>* v);
+        void InsertNode(node_type* node);
+
+        void InsertFixUp(node_type* node);
+
+        void Transplant(node_type* u, node_type* v);
         
-        // void DeleteNode(Node<KeyT>* node);
+        void DeleteNode(node_type* node);
 
-        // void DeleteFixUp(Node<KeyT>* node);
+        void DeleteFixUp(node_type* node);
 
-        void CleanTree(Node<KeyT>* node);
+        void CleanTree(node_type* node);
 
 };
 
@@ -63,6 +74,49 @@ template<typename KeyT>
 Node<KeyT>* RBTree<KeyT>::Root() const
 {
     return root_;
+}
+
+//-------------------------------------------------------------------------------//
+
+template<typename KeyT>
+Node<KeyT>* RBTree<KeyT>::TreeSearch(KeyT key, Node<KeyT>* root) const
+{
+    if (!(root) || root->key_ == key)
+        return root;
+
+    if (key < root->key_)
+        return TreeSearch(key, root->left_);
+
+    if (key > root->key_)
+        return TreeSearch(key, root->right_);
+
+    return nullptr;
+}
+
+//-------------------------------------------------------------------------------//
+
+template<typename KeyT>
+Node<KeyT>* RBTree<KeyT>::TreeMinimum(Node<KeyT>* node) const
+{
+    Node<KeyT>* x = node;
+
+    while(x)
+        x = x->left_;
+
+    return x;
+}
+
+//-------------------------------------------------------------------------------//
+
+template<typename KeyT>
+Node<KeyT>* RBTree<KeyT>::TreeMaximum(Node<KeyT>* node) const
+{
+    Node<KeyT>* x = node;
+
+    while(x)
+        x = x->right_;
+
+    return x;
 }
 
 //-------------------------------------------------------------------------------//
@@ -124,7 +178,7 @@ void RBTree<KeyT>::RightRotate(Node<KeyT>* y)
 //-------------------------------------------------------------------------------//
 
 template<typename KeyT>
-int RBTree<KeyT>::InsertKey(int key)
+int RBTree<KeyT>::InsertKey(KeyT key)
 {
     Node<KeyT>* inserting_node = new Node(key);
 
@@ -135,6 +189,19 @@ int RBTree<KeyT>::InsertKey(int key)
     }
 
     InsertNode(inserting_node);
+
+    return Config::NoErr;
+}
+
+//-------------------------------------------------------------------------------//
+
+template<typename KeyT>
+int RBTree<KeyT>::DeleteKey(KeyT key)
+{
+    Node<KeyT>* erasing_node = TreeSearch(key, root_);
+
+    if (erasing_node)
+        DeleteNode(erasing_node);
 
     return Config::NoErr;
 }
@@ -259,11 +326,115 @@ void RBTree<KeyT>::InsertFixUp(Node<KeyT>* node)
 //-------------------------------------------------------------------------------//
 
 template<typename KeyT>
+void RBTree<KeyT>::DeleteNode(Node<KeyT>* erasing_node)
+{
+    Node<KeyT>* node = erasing_node;
+
+    Node<KeyT>* x = nullptr;
+
+    Color orig_color = node->color_;
+
+    std::cout << "Ok" << std::endl;
+
+    if (erasing_node->left_ == nullptr && erasing_node->right_)
+    {
+        x = erasing_node->right_;
+
+        Transplant(erasing_node, x);
+
+        // std::cout << "Ok" << std::endl;
+    }
+
+    else if (erasing_node->right_ == nullptr && erasing_node->left_)
+    {
+        x = erasing_node->left_;
+
+        Transplant(erasing_node, x);
+
+        // std::cout << "Ok" << std::endl;
+    }
+
+    else if (erasing_node->left_ && erasing_node->right_)
+    {
+        std::cout << "Ok" << std::endl;
+        node = TreeMinimum(erasing_node->right_);
+
+        orig_color = node->color_;
+
+        x = node->right_;
+
+        if (node->parent_ == erasing_node)
+            x->parent_ = erasing_node;
+
+        else
+        {
+            Transplant(node, node->right_);
+
+            node->right_ = erasing_node->right_;
+
+            node->right_->parent_ = node;
+        }
+
+        Transplant(erasing_node, node); 
+
+        node->left_ = erasing_node->left_;
+
+        node->left_->parent_ = node;
+
+        node->color_ = erasing_node->color_;
+    }
+
+    else
+    {
+        if (erasing_node == erasing_node->parent_->left_)
+            erasing_node->parent_->left_ = nullptr;
+        
+        else
+            erasing_node->parent_->right_ = nullptr;
+    }
+
+    std::cout << "Ok" << std::endl;
+
+    if (orig_color == Color::Black)
+    {
+        std::cout << "Ok" << std::endl;
+        DeleteFixUp(x);
+    }
+
+    delete erasing_node;
+}
+
+//-------------------------------------------------------------------------------//
+
+template<typename KeyT>
+void RBTree<KeyT>::DeleteFixUp(Node<KeyT>* node)
+{
+
+}
+
+//-------------------------------------------------------------------------------//
+
+template<typename KeyT>
+void RBTree<KeyT>::Transplant(Node<KeyT>* old_node, Node<KeyT>* new_node)
+{
+    if (old_node->parent_ == nullptr)
+        root_ = new_node;
+
+    else if (old_node == old_node->parent_->left_)
+        old_node->parent_->left_  = new_node;
+
+    else if (old_node == old_node->parent_->right_)
+        old_node->parent_->right_ = new_node;
+
+    new_node->parent_ = old_node->parent_;
+}
+
+//-------------------------------------------------------------------------------//
+
+template<typename KeyT>
 RBTree<KeyT>::~RBTree()
 {
     CleanTree(root_);
-
-    size_ = 0;
 }
 
 //-------------------------------------------------------------------------------//
@@ -279,12 +450,10 @@ void RBTree<KeyT>::CleanTree(Node<KeyT>* node)
     CleanTree(node->right_);
 
     delete node;
-
-    node = nullptr;
-
-    size_ = 0;
 }
 
 //-------------------------------------------------------------------------------//
+
+} // end of SearchTree namespace
 
 #endif

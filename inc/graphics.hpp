@@ -3,6 +3,9 @@
 
 #include "rbtree.hpp"
 
+namespace SearchTree
+{
+
 //-------------------------------------------------------------------------------//
 
 template<typename KeyT>
@@ -112,5 +115,7 @@ void TreeDraw(Node<KeyT>* const node)
 }
 
 //-------------------------------------------------------------------------------//
+
+} // end of SeacrhTree namespace
 
 #endif

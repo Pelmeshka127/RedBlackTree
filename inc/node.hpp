@@ -5,6 +5,9 @@
 
 #include "config.hpp"
 
+namespace SearchTree
+{
+
 //-------------------------------------------------------------------------------//
 
 enum Color 
@@ -19,11 +22,11 @@ template<typename KeyT>
 class Node 
 {
     public: 
-        KeyT     key_;
-        Color    color_;
-        Node<KeyT>     *left_   = nullptr;
-        Node<KeyT>     *right_  = nullptr;
-        Node<KeyT>     *parent_ = nullptr;
+        KeyT            key_;
+        Color           color_;
+        Node<KeyT>      *left_   = nullptr;
+        Node<KeyT>      *right_  = nullptr;
+        Node<KeyT>      *parent_ = nullptr;
 
     Node(const KeyT& key = 0, const Color& color = Black, Node<KeyT>* left = nullptr,
          Node<KeyT>* right = nullptr,  Node<KeyT>* parent = nullptr) : 
@@ -33,5 +36,7 @@ class Node
 };
 
 //-------------------------------------------------------------------------------//
+
+} // end of SeacrhTree namespace
 
 #endif
