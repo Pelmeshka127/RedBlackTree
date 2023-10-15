@@ -334,7 +334,7 @@ void RBTree<KeyT>::DeleteNode(Node<KeyT>* erasing_node)
 
     Color orig_color = node->color_;
 
-    std::cout << "Ok" << std::endl;
+    // std::cout << "Ok" << std::endl;
 
     if (erasing_node->left_ == nullptr && erasing_node->right_)
     {
@@ -393,13 +393,15 @@ void RBTree<KeyT>::DeleteNode(Node<KeyT>* erasing_node)
             erasing_node->parent_->right_ = nullptr;
     }
 
-    std::cout << "Ok" << std::endl;
+    // std::cout << "Ok" << std::endl;
 
     if (orig_color == Color::Black)
     {
-        std::cout << "Ok" << std::endl;
+        // std::cout << "Ok" << std::endl;
         DeleteFixUp(x);
     }
+
+    // DeleteFixUp(x);
 
     delete erasing_node;
 }
@@ -409,7 +411,109 @@ void RBTree<KeyT>::DeleteNode(Node<KeyT>* erasing_node)
 template<typename KeyT>
 void RBTree<KeyT>::DeleteFixUp(Node<KeyT>* node)
 {
+    while ((!node) || node != root_ && node->color_ == Black)
+    {
+        if (node == node->parent_->left_)
+        {
+            Node<KeyT>* brother = node->parent_->right_;
 
+            if (brother->color_ == Red)
+            {
+                brother->color_ = Black;
+
+                node->parent_->color_ = Red;
+
+                LeftRotate(node->parent_);
+
+                brother = node->parent_->right_;
+            }
+
+            if (brother->left_->color_ == Black && brother->right_->color_ == Black)
+            {
+                brother->color_ = Red;
+
+                node = node->parent_;
+            }
+
+            else
+            {
+                if (brother->right_->color_ == Black)
+                {
+                    brother->left_->color_ = Black;
+
+                    brother->color_ = Red;
+
+                    RightRotate(brother);
+
+                    brother = node->parent_->right_;
+                } 
+
+                brother->color_ = node->parent_->color_;
+
+                node->parent_->color_ = Black;
+
+                brother->right_->color_ = Black;
+
+                LeftRotate(node->parent_);
+
+                node = root_;
+
+                break;
+            }
+        }
+
+        else
+        {
+            Node<KeyT>* brother = node->parent_->left_;
+
+            if (brother->color_ == Red)
+            {
+                brother->color_ = Black;
+
+                node->parent_->color_ = Red;
+
+                RightRotate(node->parent_);
+
+                brother = node->left_->parent_;
+            }
+
+            if (brother->left_->color_ == Black && brother->right_->color_ == Black)
+            {
+                brother->color_ = Red;
+
+                node = node->parent_;
+            }
+
+            else
+            {
+                if (brother->left_->color_ == Black)
+                {
+                    brother->right_->color_ = Black;
+
+                    brother->color_ = Red;
+
+                    LeftRotate(brother);
+
+                    brother = node->parent_->left_;
+                }
+
+                brother->color_ = node->parent_->color_;
+
+                node->parent_->color_ = Black;
+
+                brother->left_->color_ = Black;
+
+                RightRotate(node->parent_);
+
+                node = root_;
+
+                break;
+            }
+        }
+    }
+
+    if (node)
+        node->color_ = Black;
 }
 
 //-------------------------------------------------------------------------------//

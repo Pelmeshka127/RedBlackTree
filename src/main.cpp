@@ -31,6 +31,18 @@ int main(int argc, char** argv)
     
     TreeDump(&tree);
 
+    tree.InsertKey(10);
+
+    TreeDump(&tree);
+
+    tree.InsertKey(9);
+
+    TreeDump(&tree);
+
+    tree.DeleteKey(9);
+    
+    TreeDump(&tree);
+
     tree.DeleteKey(3);
 
     TreeDump(&tree);
