@@ -23,8 +23,6 @@ class RBTree
     public:
         RBTree() {};
 
-        // RBTree(int key);
-
         ~RBTree();
 
         size_t Size() const;
@@ -100,7 +98,7 @@ Node<KeyT>* RBTree<KeyT>::TreeMinimum(Node<KeyT>* node) const
 {
     Node<KeyT>* x = node;
 
-    while(x->left_)
+    while(x && x->left_)
         x = x->left_;
 
     return x;
@@ -113,7 +111,7 @@ Node<KeyT>* RBTree<KeyT>::TreeMaximum(Node<KeyT>* node) const
 {
     Node<KeyT>* x = node;
 
-    while(x->right_)
+    while(x && x->right_)
         x = x->right_;
 
     return x;
@@ -124,6 +122,9 @@ Node<KeyT>* RBTree<KeyT>::TreeMaximum(Node<KeyT>* node) const
 template<typename KeyT>
 void RBTree<KeyT>::LeftRotate(Node<KeyT>* x)
 {
+    if (x == nullptr || x->right_ == nullptr)
+        return;
+
     Node<KeyT>* y = x->right_;
     
     x->right_ = y->left_;
@@ -152,6 +153,9 @@ void RBTree<KeyT>::LeftRotate(Node<KeyT>* x)
 template<typename KeyT>
 void RBTree<KeyT>::RightRotate(Node<KeyT>* y)
 {
+    if (y == nullptr || y->left_ == nullptr)
+        return;
+
     Node<KeyT>* x = y->left_;
 
     y->left_ = x->right_;
@@ -324,99 +328,99 @@ void RBTree<KeyT>::InsertFixUp(Node<KeyT>* node)
 }
 
 //-------------------------------------------------------------------------------//
-
 template<typename KeyT>
-void RBTree<KeyT>::DeleteNode(Node<KeyT>* erasing_node)
+void RBTree<KeyT>::DeleteNode(Node<KeyT>*node)
 {
-    Node<KeyT>* child  = nullptr;
-    Node<KeyT>* parent = nullptr;
+	Node<KeyT> *child = nullptr, *parent = nullptr;
 
-    Color orig_color = erasing_node->color_;
+    Color color = Black;
+	
+	if (node->left_ && node->right_)     
+	{	
+		Node<KeyT> *replace = TreeMinimum(node->right_);
 
-    if (erasing_node->left_ && erasing_node->right_)
-    {
-        Node<KeyT>* node = TreeMinimum(erasing_node->right_);
+		if (node->parent_)
+		{
+			if (node->parent_->left_ == node)
+				node->parent_->left_ = replace;
 
-        if (erasing_node->parent_)
-        {
-            if (erasing_node->parent_->left_ == erasing_node)
-                erasing_node->parent_->left_  = node;
+			else
+				node->parent_->right_ = replace;
+		}
 
-            else
-                erasing_node->parent_->right_ = node;
-        }
+		else
+			root_ = replace;
 
+		child  = replace->right_;
+
+		parent = replace->parent_;
+
+		color  = replace->color_;
+		
+		if (parent == node)
+			parent = replace;
+		
         else
-            root_ = node;
+		{
+			if (child)
+				child->parent_ = parent;
+			
+            parent->left_         = child;
 
-        child = node->right_;
+			replace->right_       = node->right_;
+			
+            node->right_->parent_ = replace;
+		}
+		
+        replace->parent_     = node->parent_;
+		
+        replace->color_      = node->color_;
+		
+        replace->left_       = node->left_;
+		
+        node->left_->parent_ = replace;
+		
+        if (color == Black)
+			DeleteFixUp(child, parent);
 
-        parent = node->parent_;
+		delete node;
 
-        orig_color = node->color_;
-
-        if (parent == erasing_node)
-            parent = node;
-
-        else
-        {
-            if (child)
-                child->parent_ = parent;
-
-            parent->left_ = child;
-
-            node->right_ = erasing_node->right_;
-
-            erasing_node->right_->parent_ = node;
-        }
-
-        node->parent_ = erasing_node->parent_;
-
-        node->color_ = erasing_node->color_;
-
-        node->left_ = erasing_node->left_;
-
-        erasing_node->left_->parent_ = node;
-
-        if (orig_color == Black)
-            DeleteFixUp(child, parent);
-
-        delete erasing_node;
-
+        size_--;
+		
         return;
-    }
+	}
 
-    if (erasing_node->left_)
-        child = erasing_node->left_;
-
+	if (node->left_)    
+		child = node->left_;
+	
     else
-        child = erasing_node->right_;
+		child = node->right_;
 
-    parent = erasing_node->parent_;
+	parent = node->parent_;
+	
+    color = node->color_;
+	
+    if (child) 
+		child->parent_ = parent;
 
-    orig_color = erasing_node->color_;
+	if (parent)     
+	{
+		if (node == parent->left_)
+			parent->left_  = child;
 
-    if (child)
-        child->parent_ = parent;
+		else if (node == parent->right_)
+			parent->right_ = child;
+	}
 
-    if (parent)
-    {
-        if (erasing_node == parent->left_)
-            parent->left_ = child;
+	else
+		root_ = child;		
 
-        else
-            parent->right_ = child;
-    }
+	if (color == Black)
+		DeleteFixUp(child, parent);
 
-    else
-        root_ = child;
+	delete node;
 
-    if (orig_color == Black)
-    {
-        DeleteFixUp(child, parent);
-    }
-
-    delete erasing_node;
+    size_--;
 }
 
 //-------------------------------------------------------------------------------//
@@ -424,106 +428,114 @@ void RBTree<KeyT>::DeleteNode(Node<KeyT>* erasing_node)
 template<typename KeyT>
 void RBTree<KeyT>::DeleteFixUp(Node<KeyT>* node, Node<KeyT>* parent)
 {
-    Node<KeyT>* other_node = nullptr;
+	Node<KeyT>* brother = nullptr;
 
-    while((!node) || node->color_ == Black && node != root_)
-    {
-        if (parent->left_ == node)
-        {
-            other_node = parent->right_;
+	while ((!node) || node->color_ == Black && node != root_)
+	{
+		if (parent->left_ == node)
+		{
+			brother = parent->right_;
 
-            if (other_node->color_ == Red)
-            {
-                other_node->color_ = Black;
-
-                parent->color_ = Red;
-
-                LeftRotate(parent);
-
-                other_node = parent->right_;
-            }
-
-            else
-            {
-                if (!(other_node->right_) || other_node->right_->color_ == Black)
-                {
-                    other_node->left_->color_ = Black;
-
-                    other_node->color_ = Red;
-
-                    RightRotate(other_node);
-
-                    other_node = parent->right_;
-                }
-
-                other_node->color_ = parent->color_;
-
-                parent->color_ = Black;
-
-                other_node->right_->color_ = Black;
-
-                LeftRotate(parent);
-
-                node = root_;
-
-                break;
-            }
-        }
-
-        else
-        {
-            other_node = parent->left_;
-
-            if (other_node->color_ == Red)
-            {
-                other_node->color_ = Black;
-
-                parent->color_ = Red;
-
-                RightRotate(parent);
-
-                other_node = parent->left_;
-            }
-
-            if ((!other_node->left_ || other_node->left_->color_ == Black) && (!other_node->right_ || other_node->right_->color_ == Black))
+			if (brother->color_ == Red)
 			{
-				other_node->color_ = Red;
+				brother->color_ = Black;
 
-				node = parent;
-
-				parent = node->parent_;
+				parent->color_ = Red;
+				
+                LeftRotate(parent);
+				
+                brother = parent->right_;
 			}
 
-            else
-            {
-                if (!(other_node->left_) || other_node->left_->color_ == Black)
-                {
-                    other_node->right_->color_ = Black;
+            if ((brother->left_ == nullptr || brother->left_->color_ == Black) && (brother->right_ == nullptr || brother->right_->color_ == Black))
+			{
+				brother->color_ = Red;
 
-                    other_node->color_ = Red;
+				node = parent;
+				
+                parent = node->parent_;
+			}
 
-                    LeftRotate(other_node);
+			else
+			{
+				if (brother->right_ == nullptr || brother->right_->color_ == Black)
+				{
+					brother->left_->color_ = Black;
+					
+                    brother->color_        = Red;
 
-                    other_node = parent->left_;
-                }
+					RightRotate(brother);
+					
+                    brother = parent->right_;
+				}
 
-                other_node->color_ = parent->color_;
-
-                parent->color_ = Black;
-
-                other_node->left_->color_ = Black;
-
-                RightRotate(parent);
-
+				brother->color_         = parent->color_;
+				
+                parent->color_          = Black;
+				
+                brother->right_->color_ = Black;
+				
+                LeftRotate(parent);
+				
                 node = root_;
-
+				
                 break;
-            }
-        }
-    }
+			}
+		}
+		else
+		{
+			brother = parent->left_;
+			
+            if (brother->color_ == Red)
+			{
+				brother->color_ = Black;
+				
+                parent->color_  = Red;
+				
+                RightRotate(parent);
+				
+                brother = parent->left_;
+			}
 
-    if (node)
-        node->color_ = Black;
+			if ((brother->left_ == nullptr || brother->left_->color_ == Black) && (brother->right_ == nullptr || brother->right_->color_ == Black))
+			{
+				brother->color_ = Red;
+
+				node = parent;
+				
+                parent = node->parent_;
+			}
+
+			else
+			{
+				if (brother->left_ == nullptr || brother->left_->color_ == Black)
+				{
+					brother->right_->color_ = Black;
+					
+                    brother->color_         = Red;
+					
+                    LeftRotate(brother);
+					
+                    brother = parent->left_;
+				}
+
+				brother->color_         = parent->color_;
+				
+                parent->color_          = Black;
+				
+                brother->left_->color_  = Black;
+				
+                RightRotate(parent);
+				
+                node = root_;
+				
+                break;
+			}
+		}
+	}
+
+	if (node)
+		node->color_ = Black;
 }
 
 //-------------------------------------------------------------------------------//
