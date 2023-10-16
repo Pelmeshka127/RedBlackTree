@@ -54,7 +54,7 @@ class RBTree
         
         void DeleteNode(node_type* node);
 
-        void DeleteFixUp(node_type* node);
+        void DeleteFixUp(node_type* node, node_type* parent);
 
         void CleanTree(node_type* node);
 
@@ -100,7 +100,7 @@ Node<KeyT>* RBTree<KeyT>::TreeMinimum(Node<KeyT>* node) const
 {
     Node<KeyT>* x = node;
 
-    while(x)
+    while(x->left_)
         x = x->left_;
 
     return x;
@@ -113,7 +113,7 @@ Node<KeyT>* RBTree<KeyT>::TreeMaximum(Node<KeyT>* node) const
 {
     Node<KeyT>* x = node;
 
-    while(x)
+    while(x->right_)
         x = x->right_;
 
     return x;
@@ -328,80 +328,93 @@ void RBTree<KeyT>::InsertFixUp(Node<KeyT>* node)
 template<typename KeyT>
 void RBTree<KeyT>::DeleteNode(Node<KeyT>* erasing_node)
 {
-    Node<KeyT>* node = erasing_node;
+    Node<KeyT>* child  = nullptr;
+    Node<KeyT>* parent = nullptr;
 
-    Node<KeyT>* x = nullptr;
+    Color orig_color = erasing_node->color_;
 
-    Color orig_color = node->color_;
-
-    // std::cout << "Ok" << std::endl;
-
-    if (erasing_node->left_ == nullptr && erasing_node->right_)
+    if (erasing_node->left_ && erasing_node->right_)
     {
-        x = erasing_node->right_;
+        Node<KeyT>* node = TreeMinimum(erasing_node->right_);
 
-        Transplant(erasing_node, x);
+        if (erasing_node->parent_)
+        {
+            if (erasing_node->parent_->left_ == erasing_node)
+                erasing_node->parent_->left_  = node;
 
-        // std::cout << "Ok" << std::endl;
-    }
+            else
+                erasing_node->parent_->right_ = node;
+        }
 
-    else if (erasing_node->right_ == nullptr && erasing_node->left_)
-    {
-        x = erasing_node->left_;
+        else
+            root_ = node;
 
-        Transplant(erasing_node, x);
+        child = node->right_;
 
-        // std::cout << "Ok" << std::endl;
-    }
-
-    else if (erasing_node->left_ && erasing_node->right_)
-    {
-        std::cout << "Ok" << std::endl;
-        node = TreeMinimum(erasing_node->right_);
+        parent = node->parent_;
 
         orig_color = node->color_;
 
-        x = node->right_;
-
-        if (node->parent_ == erasing_node)
-            x->parent_ = erasing_node;
+        if (parent == erasing_node)
+            parent = node;
 
         else
         {
-            Transplant(node, node->right_);
+            if (child)
+                child->parent_ = parent;
+
+            parent->left_ = child;
 
             node->right_ = erasing_node->right_;
 
-            node->right_->parent_ = node;
+            erasing_node->right_->parent_ = node;
         }
 
-        Transplant(erasing_node, node); 
+        node->parent_ = erasing_node->parent_;
+
+        node->color_ = erasing_node->color_;
 
         node->left_ = erasing_node->left_;
 
-        node->left_->parent_ = node;
+        erasing_node->left_->parent_ = node;
 
-        node->color_ = erasing_node->color_;
+        if (orig_color == Black)
+            DeleteFixUp(child, parent);
+
+        delete erasing_node;
+
+        return;
+    }
+
+    if (erasing_node->left_)
+        child = erasing_node->left_;
+
+    else
+        child = erasing_node->right_;
+
+    parent = erasing_node->parent_;
+
+    orig_color = erasing_node->color_;
+
+    if (child)
+        child->parent_ = parent;
+
+    if (parent)
+    {
+        if (erasing_node == parent->left_)
+            parent->left_ = child;
+
+        else
+            parent->right_ = child;
     }
 
     else
+        root_ = child;
+
+    if (orig_color == Black)
     {
-        if (erasing_node == erasing_node->parent_->left_)
-            erasing_node->parent_->left_ = nullptr;
-        
-        else
-            erasing_node->parent_->right_ = nullptr;
+        DeleteFixUp(child, parent);
     }
-
-    // std::cout << "Ok" << std::endl;
-
-    if (orig_color == Color::Black)
-    {
-        // std::cout << "Ok" << std::endl;
-        DeleteFixUp(x);
-    }
-
-    // DeleteFixUp(x);
 
     delete erasing_node;
 }
@@ -409,52 +422,47 @@ void RBTree<KeyT>::DeleteNode(Node<KeyT>* erasing_node)
 //-------------------------------------------------------------------------------//
 
 template<typename KeyT>
-void RBTree<KeyT>::DeleteFixUp(Node<KeyT>* node)
+void RBTree<KeyT>::DeleteFixUp(Node<KeyT>* node, Node<KeyT>* parent)
 {
-    while ((!node) || node != root_ && node->color_ == Black)
+    Node<KeyT>* other_node = nullptr;
+
+    while((!node) || node->color_ == Black && node != root_)
     {
-        if (node == node->parent_->left_)
+        if (parent->left_ == node)
         {
-            Node<KeyT>* brother = node->parent_->right_;
+            other_node = parent->right_;
 
-            if (brother->color_ == Red)
+            if (other_node->color_ == Red)
             {
-                brother->color_ = Black;
+                other_node->color_ = Black;
 
-                node->parent_->color_ = Red;
+                parent->color_ = Red;
 
-                LeftRotate(node->parent_);
+                LeftRotate(parent);
 
-                brother = node->parent_->right_;
-            }
-
-            if (brother->left_->color_ == Black && brother->right_->color_ == Black)
-            {
-                brother->color_ = Red;
-
-                node = node->parent_;
+                other_node = parent->right_;
             }
 
             else
             {
-                if (brother->right_->color_ == Black)
+                if (!(other_node->right_) || other_node->right_->color_ == Black)
                 {
-                    brother->left_->color_ = Black;
+                    other_node->left_->color_ = Black;
 
-                    brother->color_ = Red;
+                    other_node->color_ = Red;
 
-                    RightRotate(brother);
+                    RightRotate(other_node);
 
-                    brother = node->parent_->right_;
-                } 
+                    other_node = parent->right_;
+                }
 
-                brother->color_ = node->parent_->color_;
+                other_node->color_ = parent->color_;
 
-                node->parent_->color_ = Black;
+                parent->color_ = Black;
 
-                brother->right_->color_ = Black;
+                other_node->right_->color_ = Black;
 
-                LeftRotate(node->parent_);
+                LeftRotate(parent);
 
                 node = root_;
 
@@ -464,46 +472,48 @@ void RBTree<KeyT>::DeleteFixUp(Node<KeyT>* node)
 
         else
         {
-            Node<KeyT>* brother = node->parent_->left_;
+            other_node = parent->left_;
 
-            if (brother->color_ == Red)
+            if (other_node->color_ == Red)
             {
-                brother->color_ = Black;
+                other_node->color_ = Black;
 
-                node->parent_->color_ = Red;
+                parent->color_ = Red;
 
-                RightRotate(node->parent_);
+                RightRotate(parent);
 
-                brother = node->left_->parent_;
+                other_node = parent->left_;
             }
 
-            if (brother->left_->color_ == Black && brother->right_->color_ == Black)
-            {
-                brother->color_ = Red;
+            if ((!other_node->left_ || other_node->left_->color_ == Black) && (!other_node->right_ || other_node->right_->color_ == Black))
+			{
+				other_node->color_ = Red;
 
-                node = node->parent_;
-            }
+				node = parent;
+
+				parent = node->parent_;
+			}
 
             else
             {
-                if (brother->left_->color_ == Black)
+                if (!(other_node->left_) || other_node->left_->color_ == Black)
                 {
-                    brother->right_->color_ = Black;
+                    other_node->right_->color_ = Black;
 
-                    brother->color_ = Red;
+                    other_node->color_ = Red;
 
-                    LeftRotate(brother);
+                    LeftRotate(other_node);
 
-                    brother = node->parent_->left_;
+                    other_node = parent->left_;
                 }
 
-                brother->color_ = node->parent_->color_;
+                other_node->color_ = parent->color_;
 
-                node->parent_->color_ = Black;
+                parent->color_ = Black;
 
-                brother->left_->color_ = Black;
+                other_node->left_->color_ = Black;
 
-                RightRotate(node->parent_);
+                RightRotate(parent);
 
                 node = root_;
 

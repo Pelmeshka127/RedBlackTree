@@ -36,14 +36,14 @@ int main(int argc, char** argv)
     TreeDump(&tree);
 
     tree.InsertKey(9);
-
-    TreeDump(&tree);
-
-    tree.DeleteKey(9);
     
     TreeDump(&tree);
 
-    tree.DeleteKey(3);
+    tree.DeleteKey(5);
+
+    TreeDump(&tree);
+
+    tree.DeleteKey(10);
 
     TreeDump(&tree);
 
