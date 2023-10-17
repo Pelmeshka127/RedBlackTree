@@ -331,94 +331,94 @@ void RBTree<KeyT>::InsertFixUp(Node<KeyT>* node)
 template<typename KeyT>
 void RBTree<KeyT>::DeleteNode(Node<KeyT>*node)
 {
-	Node<KeyT> *child = nullptr, *parent = nullptr;
+    Node<KeyT> *child = nullptr, *parent = nullptr;
 
-    Color color = Black;
-	
-	if (node->left_ && node->right_)     
-	{	
-		Node<KeyT> *replace = TreeMinimum(node->right_);
+    Color orig_color = Black;
 
-		if (node->parent_)
-		{
-			if (node->parent_->left_ == node)
-				node->parent_->left_ = replace;
+    if (node->left_ && node->right_)    
+	{
+        Node<KeyT>* replace_node = TreeMinimum(node->right_);
 
-			else
-				node->parent_->right_ = replace;
-		}
+        if (node->parent_)
+        {
+            if (node->parent_->left_ == node)
+                node->parent_->left_ = replace_node;
 
-		else
-			root_ = replace;
+            else
+                node->parent_->right_  = replace_node;
+        }
 
-		child  = replace->right_;
-
-		parent = replace->parent_;
-
-		color  = replace->color_;
-		
-		if (parent == node)
-			parent = replace;
-		
         else
-		{
-			if (child)
-				child->parent_ = parent;
-			
+            root_ = replace_node;
+
+        child       = replace_node->right_;
+
+        parent      = replace_node->parent_;
+
+        orig_color  = replace_node->color_;
+
+        if (parent == node)
+            parent = replace_node;
+
+        else
+        {
+            if (child)
+                child->parent_ = parent;
+
             parent->left_         = child;
 
-			replace->right_       = node->right_;
-			
-            node->right_->parent_ = replace;
-		}
-		
-        replace->parent_     = node->parent_;
-		
-        replace->color_      = node->color_;
-		
-        replace->left_       = node->left_;
-		
-        node->left_->parent_ = replace;
-		
-        if (color == Black)
-			DeleteFixUp(child, parent);
+            replace_node->right_  = node->right_;
 
-		delete node;
+            node->right_->parent_ = replace_node;
+        }
+
+        replace_node->parent_   = node->parent_;
+
+        replace_node->color_    = node->color_;
+
+        replace_node->left_     = node->left_;
+
+        node->left_->parent_    = replace_node;
+
+        if (orig_color == Black)
+            DeleteFixUp(child, parent);
+
+        delete node;
 
         size_--;
-		
+
         return;
-	}
+    }
 
-	if (node->left_)    
-		child = node->left_;
-	
+    if (node->left_)
+        child = node->left_;
+    
     else
-		child = node->right_;
+        child = node->right_;
 
-	parent = node->parent_;
-	
-    color = node->color_;
-	
-    if (child) 
-		child->parent_ = parent;
+    parent = node->parent_;
 
-	if (parent)     
-	{
-		if (node == parent->left_)
-			parent->left_  = child;
+    orig_color = node->color_;
 
-		else if (node == parent->right_)
-			parent->right_ = child;
-	}
+    if (child)
+        child->parent_ = parent;
 
-	else
-		root_ = child;		
+    if (parent)
+    {
+        if (node == parent->left_)
+            parent->left_  = child;
 
-	if (color == Black)
-		DeleteFixUp(child, parent);
+        else if (node == parent->right_)
+            parent->right_ = child;
+    }
 
-	delete node;
+    else
+        root_ = child;
+
+    if (orig_color == Black)
+        DeleteFixUp(child, parent);
+
+    delete node;
 
     size_--;
 }
@@ -428,116 +428,116 @@ void RBTree<KeyT>::DeleteNode(Node<KeyT>*node)
 template<typename KeyT>
 void RBTree<KeyT>::DeleteFixUp(Node<KeyT>* node, Node<KeyT>* parent)
 {
-	Node<KeyT>* brother = nullptr;
+    Node<KeyT>* brother = nullptr;
 
-	while ((!node) || node->color_ == Black && node != root_)
-	{
-		if (parent->left_ == node)
-		{
-			brother = parent->right_;
+    while ((!node) || node->color_ == Black && node != root_)
+    {
+        if (parent->left_ == node)
+        {
+            brother = parent->right_;
 
-			if (brother->color_ == Red)
-			{
-				brother->color_ = Black;
+            if (brother->color_ == Red)
+            {
+                brother->color_ = Black;
 
-				parent->color_ = Red;
-				
+                parent->color_ = Red;
+
                 LeftRotate(parent);
-				
+
                 brother = parent->right_;
-			}
+            }
 
             if ((brother->left_ == nullptr || brother->left_->color_ == Black) && (brother->right_ == nullptr || brother->right_->color_ == Black))
-			{
-				brother->color_ = Red;
+            {
+                brother->color_ = Red;
 
-				node = parent;
-				
-                parent = node->parent_;
-			}
+                node    = parent;
 
-			else
-			{
-				if (brother->right_ == nullptr || brother->right_->color_ == Black)
-				{
-					brother->left_->color_ = Black;
-					
+                parent  = node->parent_;
+            }
+
+            else
+            {
+                if (brother->right_ == nullptr || brother->right_->color_ == Black)
+                {
+                    brother->left_->color_ = Black;
+
                     brother->color_        = Red;
 
-					RightRotate(brother);
-					
+                    RightRotate(brother);
+
                     brother = parent->right_;
-				}
+                }
 
-				brother->color_         = parent->color_;
-				
+                brother->color_         = parent->color_;
+
                 parent->color_          = Black;
-				
+
                 brother->right_->color_ = Black;
-				
+
                 LeftRotate(parent);
-				
+
                 node = root_;
-				
+
                 break;
-			}
-		}
-		else
-		{
-			brother = parent->left_;
-			
+            }
+        }
+
+        else
+        {
+            brother = parent->left_;
+
             if (brother->color_ == Red)
-			{
-				brother->color_ = Black;
-				
-                parent->color_  = Red;
-				
+            {
+                brother->color_ = Black;
+
+                parent->color_  = Black;
+
                 RightRotate(parent);
-				
+
                 brother = parent->left_;
-			}
+            }
 
-			if ((brother->left_ == nullptr || brother->left_->color_ == Black) && (brother->right_ == nullptr || brother->right_->color_ == Black))
-			{
-				brother->color_ = Red;
+            if ((brother->left_ == nullptr || brother->left_->color_ == Black) && (brother->right_ == nullptr || brother->right_->color_ == Black))
+            {
+                brother->color_ = Red;
 
-				node = parent;
-				
-                parent = node->parent_;
-			}
+                node    = parent;
 
-			else
-			{
-				if (brother->left_ == nullptr || brother->left_->color_ == Black)
-				{
-					brother->right_->color_ = Black;
-					
-                    brother->color_         = Red;
-					
+                parent  = node->parent_;
+            }
+
+            else
+            {
+                if (brother->left_ == nullptr || brother->left_->color_ == Black)
+                {
+                    brother->right_->color_ = Black;
+
+                    brother->color_ = Red;
+
                     LeftRotate(brother);
-					
+
                     brother = parent->left_;
-				}
+                }
 
-				brother->color_         = parent->color_;
-				
-                parent->color_          = Black;
-				
-                brother->left_->color_  = Black;
-				
+                brother->color_ = parent->color_;
+
+                parent->color_ = Black;
+
+                brother->left_->color_ = Black;
+
                 RightRotate(parent);
-				
+
                 node = root_;
-				
+
                 break;
-			}
-		}
-	}
+            }
+        }
+    }
 
-	if (node)
-		node->color_ = Black;
+    if (node)
+        node->color_ = Black;
 }
-
 //-------------------------------------------------------------------------------//
 
 template<typename KeyT>
