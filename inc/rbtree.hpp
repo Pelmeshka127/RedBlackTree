@@ -9,6 +9,7 @@ namespace SearchTree
 {
 
 //-------------------------------------------------------------------------------//
+//---------------------------Start Red Black Tree Class--------------------------//
 
 template<typename KeyT>
 class RBTree
@@ -40,6 +41,10 @@ class RBTree
 
         Node<KeyT>* TreeMaximum(node_type* node) const;
 
+        Node<KeyT>* LowerBound(const KeyT& key) const;
+
+        Node<KeyT>* UpperBound(const KeyT& key) const;
+
         void LeftRotate(node_type* rotated_node);
 
         void RightRotate(node_type* rotated_node);
@@ -58,7 +63,11 @@ class RBTree
 
 };
 
+//-----------------------------End Red Black Tree Class--------------------------//
+
 //-------------------------------------------------------------------------------//
+
+//--------------------------------Start Selectors--------------------------------//
 
 template<typename KeyT>
 size_t RBTree<KeyT>::Size() const
@@ -74,7 +83,62 @@ Node<KeyT>* RBTree<KeyT>::Root() const
     return root_;
 }
 
+//-------------------------------End Selectors-----------------------------------//
+
 //-------------------------------------------------------------------------------//
+
+//------------------------------Start Bounds-------------------------------------//
+
+template<typename KeyT>
+Node<KeyT>* RBTree<KeyT>::LowerBound(const KeyT& key) const
+{
+    Node<KeyT> *node = nullptr, *curr = root_;
+
+    while (curr != nullptr)
+    {
+        if (key < curr->key_)
+        {
+            node = curr;
+
+            curr = curr->left_;
+        }
+
+        else
+            curr = curr->right_;
+    }
+
+    return node;
+}
+
+//-------------------------------------------------------------------------------//
+
+template<typename KeyT>
+Node<KeyT>* RBTree<KeyT>::UpperBound(const KeyT& key) const
+{
+    Node<KeyT> *node = nullptr, *curr = nullptr;
+
+    while (curr != nullptr)
+    {
+        if (key > curr->key)
+        {
+            node = curr;
+
+            curr = curr->right_;
+        }
+
+        else
+            curr = curr->left_;
+    }
+
+    return node;
+}
+
+
+//--------------------------------End Bounds-------------------------------------//
+
+//-------------------------------------------------------------------------------//
+
+//-----------------------------Start Tree Functions------------------------------//
 
 template<typename KeyT>
 Node<KeyT>* RBTree<KeyT>::TreeSearch(KeyT key, Node<KeyT>* root) const
@@ -117,7 +181,11 @@ Node<KeyT>* RBTree<KeyT>::TreeMaximum(Node<KeyT>* node) const
     return x;
 }
 
+//-----------------------End Tree Functions--------------------------------------//
+
 //-------------------------------------------------------------------------------//
+
+//----------------------Start Rotates and Transplant-----------------------------//
 
 template<typename KeyT>
 void RBTree<KeyT>::LeftRotate(Node<KeyT>* x)
@@ -180,6 +248,27 @@ void RBTree<KeyT>::RightRotate(Node<KeyT>* y)
 }
 
 //-------------------------------------------------------------------------------//
+
+template<typename KeyT>
+void RBTree<KeyT>::Transplant(Node<KeyT>* old_node, Node<KeyT>* new_node)
+{
+    if (old_node->parent_ == nullptr)
+        root_ = new_node;
+
+    else if (old_node == old_node->parent_->left_)
+        old_node->parent_->left_  = new_node;
+
+    else if (old_node == old_node->parent_->right_)
+        old_node->parent_->right_ = new_node;
+
+    new_node->parent_ = old_node->parent_;
+}
+
+//------------------------End Rotates and Transplant-----------------------------//
+
+//-------------------------------------------------------------------------------//
+
+//-------------------------Start Inserting and Deleting--------------------------//
 
 template<typename KeyT>
 int RBTree<KeyT>::InsertKey(KeyT key)
@@ -328,6 +417,7 @@ void RBTree<KeyT>::InsertFixUp(Node<KeyT>* node)
 }
 
 //-------------------------------------------------------------------------------//
+
 template<typename KeyT>
 void RBTree<KeyT>::DeleteNode(Node<KeyT>*node)
 {
@@ -538,24 +628,12 @@ void RBTree<KeyT>::DeleteFixUp(Node<KeyT>* node, Node<KeyT>* parent)
     if (node)
         node->color_ = Black;
 }
-//-------------------------------------------------------------------------------//
 
-template<typename KeyT>
-void RBTree<KeyT>::Transplant(Node<KeyT>* old_node, Node<KeyT>* new_node)
-{
-    if (old_node->parent_ == nullptr)
-        root_ = new_node;
-
-    else if (old_node == old_node->parent_->left_)
-        old_node->parent_->left_  = new_node;
-
-    else if (old_node == old_node->parent_->right_)
-        old_node->parent_->right_ = new_node;
-
-    new_node->parent_ = old_node->parent_;
-}
+//---------------------------End Inserting and Deleting--------------------------//
 
 //-------------------------------------------------------------------------------//
+
+//---------------------------------Start Dtor------------------------------------//
 
 template<typename KeyT>
 RBTree<KeyT>::~RBTree()
@@ -577,6 +655,8 @@ void RBTree<KeyT>::CleanTree(Node<KeyT>* node)
 
     delete node;
 }
+
+//---------------------------------End Dtor--------------------------------------//
 
 //-------------------------------------------------------------------------------//
 
