@@ -1,59 +1,38 @@
+#include <ctime>
+
 #include "rbtree.hpp"
 #include "graphics.hpp"
+
+// #include <gtest/gtest.h>
+// #include <gmock/gmock.h>
 
 int main(int argc, char** argv)
 {
     using namespace SearchTree;
 
-    RBTree<int> tree;
+    RBTree<int> tree1;
 
-    tree.InsertKey(5);
+    tree1.InsertKey(5);
 
-    TreeDump(&tree);
+    tree1.InsertKey(2);
 
-    tree.InsertKey(2);
+    tree1.InsertKey(4);
 
-    TreeDump(&tree);
+    TreeDump(&tree1);
 
-    tree.InsertKey(4);
+    RBTree<int> tree2;
 
-    TreeDump(&tree);
+    tree2.InsertKey(8);
 
-    tree.InsertKey(1);
+    tree2.InsertKey(9);
 
-    TreeDump(&tree);
+    tree2.InsertKey(10);
 
-    tree.InsertKey(6);
+    TreeDump(&tree2);
 
-    TreeDump(&tree);
+    tree2 = tree1;
 
-    tree.InsertKey(3);
-    
-    TreeDump(&tree);
-
-    tree.InsertKey(10);
-
-    TreeDump(&tree);
-
-    tree.InsertKey(9);
-
-    TreeDump(&tree);
-
-    tree.DeleteKey(2);
-    
-    TreeDump(&tree);
-
-    tree.DeleteKey(5);
-
-    TreeDump(&tree);
-
-    tree.DeleteKey(6);
-
-    TreeDump(&tree);
-
-    tree.DeleteKey(10);
-
-    TreeDump(&tree);
+    TreeDump(&tree2);
 
     return 0;
 }

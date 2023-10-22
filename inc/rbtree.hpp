@@ -22,9 +22,18 @@ class RBTree
         node_type *root_  = nullptr;
 
     public:
-        RBTree() {};
+        
+        RBTree() {};                            // constructor
 
-        ~RBTree();
+        RBTree(const RBTree& rhs);              // copy constructor
+
+        RBTree(RBTree&& rhs);                   // move constructor
+
+        RBTree& operator=(const RBTree& rhs);   // copy assignment
+
+        RBTree& operator=(RBTree&& rhs);        // move assignment
+
+        ~RBTree();                              // destructor
 
         size_t Size() const;
 
@@ -37,6 +46,7 @@ class RBTree
         node_type* TreeSearch(KeyT key, node_type* root) const;
 
     private:
+
         Node<KeyT>* TreeMinimum(node_type* node) const;
 
         Node<KeyT>* TreeMaximum(node_type* node) const;
@@ -60,13 +70,78 @@ class RBTree
         void DeleteFixUp(node_type* node, node_type* parent);
 
         void CleanTree(node_type* node);
-
 };
 
 //-----------------------------End Red Black Tree Class--------------------------//
+//-------------------------------------------------------------------------------//
+//-------------------------------Start Rule Of Five------------------------------//
+
+template<typename KeyT>
+RBTree<KeyT>::RBTree(const RBTree<KeyT>& rhs) // copy constructor
+{
+    std::cout << "copy constructor" << std::endl;
+}
 
 //-------------------------------------------------------------------------------//
 
+template<typename KeyT>
+RBTree<KeyT>::RBTree(RBTree<KeyT>&& rhs) // move constructor
+{
+    std::cout << "move constructor" << std::endl;
+
+    root_ = rhs.root_;
+
+    size_ = rhs.size_;
+
+    rhs.root_ = nullptr;
+
+    rhs.size_ = 0;
+}
+
+//-------------------------------------------------------------------------------//
+
+template<typename KeyT>
+RBTree<KeyT>& RBTree<KeyT>::operator=(const RBTree& rhs) // copy assignment
+{
+    std::cout << "copy assignment" << std::endl;
+
+    if (this == &rhs)
+        return *this;
+
+    // CleanTree(root_);
+
+    RBTree tmp{rhs};
+
+    *this = std::move(tmp);
+
+    return *this;
+}
+
+//-------------------------------------------------------------------------------//
+
+template<typename KeyT>
+RBTree<KeyT>& RBTree<KeyT>::operator=(RBTree&& rhs) // move assignment
+{
+    std::cout << "move assignment" << std::endl;
+
+    if (this == &rhs)
+        return *this;
+
+    CleanTree(root_);
+
+    root_ = rhs.root_;
+
+    size_ = rhs.size_;
+
+    rhs.root_ = nullptr;
+
+    rhs.size_ = 0;
+
+    return *this;
+}
+
+//--------------------------------End Rule Of Five-------------------------------//
+//-------------------------------------------------------------------------------//
 //--------------------------------Start Selectors--------------------------------//
 
 template<typename KeyT>
@@ -84,9 +159,7 @@ Node<KeyT>* RBTree<KeyT>::Root() const
 }
 
 //-------------------------------End Selectors-----------------------------------//
-
 //-------------------------------------------------------------------------------//
-
 //------------------------------Start Bounds-------------------------------------//
 
 template<typename KeyT>
@@ -135,9 +208,7 @@ Node<KeyT>* RBTree<KeyT>::UpperBound(const KeyT& key) const
 
 
 //--------------------------------End Bounds-------------------------------------//
-
 //-------------------------------------------------------------------------------//
-
 //-----------------------------Start Tree Functions------------------------------//
 
 template<typename KeyT>
@@ -182,9 +253,7 @@ Node<KeyT>* RBTree<KeyT>::TreeMaximum(Node<KeyT>* node) const
 }
 
 //-----------------------End Tree Functions--------------------------------------//
-
 //-------------------------------------------------------------------------------//
-
 //----------------------Start Rotates and Transplant-----------------------------//
 
 template<typename KeyT>
@@ -265,9 +334,7 @@ void RBTree<KeyT>::Transplant(Node<KeyT>* old_node, Node<KeyT>* new_node)
 }
 
 //------------------------End Rotates and Transplant-----------------------------//
-
 //-------------------------------------------------------------------------------//
-
 //-------------------------Start Inserting and Deleting--------------------------//
 
 template<typename KeyT>
@@ -630,9 +697,7 @@ void RBTree<KeyT>::DeleteFixUp(Node<KeyT>* node, Node<KeyT>* parent)
 }
 
 //---------------------------End Inserting and Deleting--------------------------//
-
 //-------------------------------------------------------------------------------//
-
 //---------------------------------Start Dtor------------------------------------//
 
 template<typename KeyT>
@@ -657,7 +722,6 @@ void RBTree<KeyT>::CleanTree(Node<KeyT>* node)
 }
 
 //---------------------------------End Dtor--------------------------------------//
-
 //-------------------------------------------------------------------------------//
 
 } // end of SearchTree namespace
