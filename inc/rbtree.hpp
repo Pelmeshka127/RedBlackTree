@@ -80,6 +80,64 @@ template<typename KeyT>
 RBTree<KeyT>::RBTree(const RBTree<KeyT>& rhs) // copy constructor
 {
     std::cout << "copy constructor" << std::endl;
+
+    if (rhs.root_ == nullptr)
+    {
+        root_ = nullptr;
+        return;
+    }
+
+    root_ = new Node<KeyT>;
+
+    if (root_ == nullptr)
+    {
+        std::cerr << "Failed allocation memory for root_ in " << __PRETTY_FUNCTION__<< std::endl;
+        return;
+    }
+
+    Node<KeyT> *copy = root_, *other = rhs.root_;
+
+    while (other)
+    {
+        if (copy->left_ == nullptr && other->left_)
+        {
+            copy->left_ = new Node<KeyT>;
+
+            copy->left_->parent_ = copy;
+
+            copy = copy->left_;
+
+            other = other->left_;
+        }
+
+        else if (copy->right_ == nullptr && other->right_)
+        {
+            copy->right_ = new Node<KeyT>;
+
+            copy->right_->parent_ = copy;
+
+            copy = copy->right_;
+
+            other = other->right_;
+        }
+
+        else
+        {
+            copy->key_ = other->key_;
+
+            copy->color_ = other->color_;
+
+            if (copy != root_)
+            {
+                copy = copy->parent_;
+
+                other = other->parent_;
+            }
+
+            else
+                break;
+        }
+    }
 }
 
 //-------------------------------------------------------------------------------//
@@ -89,9 +147,9 @@ RBTree<KeyT>::RBTree(RBTree<KeyT>&& rhs) // move constructor
 {
     std::cout << "move constructor" << std::endl;
 
-    root_ = rhs.root_;
+    std::swap(root_, rhs.root_);
 
-    size_ = rhs.size_;
+    std::swap(size_, rhs.size_);
 
     rhs.root_ = nullptr;
 
@@ -107,8 +165,6 @@ RBTree<KeyT>& RBTree<KeyT>::operator=(const RBTree& rhs) // copy assignment
 
     if (this == &rhs)
         return *this;
-
-    // CleanTree(root_);
 
     RBTree tmp{rhs};
 
@@ -127,15 +183,9 @@ RBTree<KeyT>& RBTree<KeyT>::operator=(RBTree&& rhs) // move assignment
     if (this == &rhs)
         return *this;
 
-    CleanTree(root_);
+    std::swap(root_, rhs.root_);
 
-    root_ = rhs.root_;
-
-    size_ = rhs.size_;
-
-    rhs.root_ = nullptr;
-
-    rhs.size_ = 0;
+    std::swap(size_, rhs.size_);
 
     return *this;
 }
@@ -703,6 +753,8 @@ void RBTree<KeyT>::DeleteFixUp(Node<KeyT>* node, Node<KeyT>* parent)
 template<typename KeyT>
 RBTree<KeyT>::~RBTree()
 {
+    std::cout << "Destructor" << std::endl;
+
     CleanTree(root_);
 }
 

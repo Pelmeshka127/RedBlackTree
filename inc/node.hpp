@@ -34,6 +34,8 @@ class Node
 
         size_t          subtree_size_ = 0;
 
+    // Node() {}
+
     Node(const KeyT& key = 0, const Color& color = Black, Node<KeyT>* left = nullptr,
          Node<KeyT>* right = nullptr,  Node<KeyT>* parent = nullptr) : 
          key_{key}, color_{color}, left_{left}, right_{right}, parent_{parent} 
@@ -48,6 +50,8 @@ class Node
     Node& operator=(const Node& rhs)    = delete; // copy assignment
 
     Node& operator=(Node&& rhs)         = delete; // move assignment
+
+    void CopyTree(Node<KeyT>* rhs);
 
     ~Node() {};
 };
