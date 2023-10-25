@@ -44,6 +44,12 @@ class RBTree
         int DeleteKey(KeyT key);
 
         node_type* TreeSearch(KeyT key, node_type* root) const;
+        
+        Node<KeyT>* LowerBound(const KeyT& key) const;
+
+        Node<KeyT>* UpperBound(const KeyT& key) const;
+
+        size_t Distance(KeyT first, KeyT second) const;
 
     private:
 
@@ -51,9 +57,9 @@ class RBTree
 
         Node<KeyT>* TreeMaximum(node_type* node) const;
 
-        Node<KeyT>* LowerBound(const KeyT& key) const;
+        // Node<KeyT>* LowerBound(const KeyT& key) const;
 
-        Node<KeyT>* UpperBound(const KeyT& key) const;
+        // Node<KeyT>* UpperBound(const KeyT& key) const;
 
         void LeftRotate(node_type* rotated_node);
 
@@ -208,9 +214,7 @@ Node<KeyT>* RBTree<KeyT>::Root() const
     return root_;
 }
 
-//-------------------------------End Selectors-----------------------------------//
 //-------------------------------------------------------------------------------//
-//------------------------------Start Bounds-------------------------------------//
 
 template<typename KeyT>
 Node<KeyT>* RBTree<KeyT>::LowerBound(const KeyT& key) const
@@ -242,7 +246,7 @@ Node<KeyT>* RBTree<KeyT>::UpperBound(const KeyT& key) const
 
     while (curr != nullptr)
     {
-        if (key > curr->key)
+        if (key > curr->key_)
         {
             node = curr;
 
@@ -256,8 +260,26 @@ Node<KeyT>* RBTree<KeyT>::UpperBound(const KeyT& key) const
     return node;
 }
 
+//-------------------------------------------------------------------------------//
 
-//--------------------------------End Bounds-------------------------------------//
+template<typename KeyT>
+size_t RBTree<KeyT>::Distance(KeyT first, KeyT second) const
+{
+    Node<KeyT>* left_node  = LowerBound(first);
+
+    Node<KeyT>* right_node = UpperBound(second);
+
+    size_t result = 0;
+
+    
+
+    if (!left_node || !right_node)
+        return 0;
+
+    return 1;
+}
+
+//--------------------------------End Selectors----------------------------------//
 //-------------------------------------------------------------------------------//
 //-----------------------------Start Tree Functions------------------------------//
 
@@ -333,6 +355,12 @@ void RBTree<KeyT>::LeftRotate(Node<KeyT>* x)
     y->left_   = x;
     
     x->parent_ = y;
+
+    // x->SizeUpdate();
+
+    // y->SizeUpdate();
+
+    root_->Resize();
 }
 
 //-------------------------------------------------------------------------------//
@@ -364,6 +392,12 @@ void RBTree<KeyT>::RightRotate(Node<KeyT>* y)
     x->right_  = y;
 
     y->parent_ = x;
+
+    // y->SizeUpdate();
+
+    // x->SizeUpdate();
+
+    root_->Resize();
 }
 
 //-------------------------------------------------------------------------------//
@@ -452,6 +486,15 @@ void RBTree<KeyT>::InsertNode(Node<KeyT>* inserting_node)
     size_++;
 
     InsertFixUp(inserting_node);
+
+    // while (inserting_node != nullptr)
+    // {
+    //     inserting_node->SizeUpdate();
+
+    //     inserting_node = inserting_node->parent_;
+    // }
+
+    root_->Resize();
 }
 
 //-------------------------------------------------------------------------------//
@@ -628,6 +671,8 @@ void RBTree<KeyT>::DeleteNode(Node<KeyT>*node)
     delete node;
 
     size_--;
+
+    root_->Resize();
 }
 
 //-------------------------------------------------------------------------------//

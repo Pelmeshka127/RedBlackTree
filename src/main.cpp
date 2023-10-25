@@ -6,33 +6,93 @@
 // #include <gtest/gtest.h>
 // #include <gmock/gmock.h>
 
+//-------------------------------------------------------------------------------//
+
+// int main(int argc, char** argv)
+// {
+//     using namespace SearchTree;
+
+//     RBTree<int> tree1;
+
+//     char cmd{};
+
+//     bool mode = true;
+
+//     while (mode && std::cin >> cmd)
+//     {
+//         switch (cmd)
+//         {
+//             case 'k':
+//             {
+//                 int n = 0;
+
+//                 std::cin >> n;
+
+//                 tree1.InsertKey(n);
+
+//                 break;
+//             }
+
+//             case 'q':
+//             {
+//                 int first = 0, second = 0;
+
+//                 std::cin >> first >> second;
+
+//                 std::cout << tree1.Distance(first, second);
+
+//                 break;
+//             }
+
+//             default:
+//             {
+//                 mode = false;
+//             }
+//         }
+//     }
+
+//     TreeDump(&tree1);
+
+//     return 0;
+// }
+
+//-------------------------------------------------------------------------------//
+
 int main(int argc, char** argv)
 {
     using namespace SearchTree;
 
-    RBTree<int> tree1;
+    RBTree<int> tree;
 
-    tree1.InsertKey(5);
+    tree.InsertKey(2);
 
-    tree1.InsertKey(2);
+    TreeDump(&tree);
 
-    tree1.InsertKey(4);
+    tree.InsertKey(1);
 
-    TreeDump(&tree1);
+    TreeDump(&tree);
 
-    RBTree<int> tree2;
+    tree.InsertKey(3);
 
-    tree2.InsertKey(8);
+    TreeDump(&tree);
 
-    tree2.InsertKey(9);
+    tree.InsertKey(4);
 
-    tree2.InsertKey(10);
+    TreeDump(&tree);
 
-    TreeDump(&tree2);
+    tree.InsertKey(7);
 
-    tree2 = tree1;
+    TreeDump(&tree);
 
-    TreeDump(&tree2);
+    tree.InsertKey(5);
+
+    TreeDump(&tree);
+
+    tree.DeleteKey(3);
+
+    TreeDump(&tree);
 
     return 0;
 }
+
+//-------------------------------------------------------------------------------//

@@ -71,14 +71,14 @@ void TreeDraw(Node<KeyT>* const node)
 
     if (node->color_ == Black)
     {
-        fprintf(graph_file, "   \"%p\"[shape = Mrecord, style = filled, fontcolor = \"white\", fillcolor = \"black\","
-                            "   label = \" <value> %d\"];\n", node, node->key_);
+        fprintf(graph_file, "   \"%p\"[shape = Mrecord, color = \"red\", style = filled, fontcolor = \"white\", fillcolor = \"black\","
+                            "   label = \" <value> %d | size = %zu\"];\n", node, node->key_, node->subtree_size_);
     }
 
     else if (node->color_ == Red)
     {
-        fprintf(graph_file, "  \"%p\"[shape = Mrecord, style = filled, fillcolor = \"firebrick2\","
-                            "   label = \" <value> %d\"];\n", node, node->key_);
+        fprintf(graph_file, "  \"%p\"[shape = Mrecord, color = \"black\", style = filled, fillcolor = \"firebrick2\","
+                            "   label = \" <value> %d | size = %zu\"];\n", node, node->key_, node->subtree_size_);
     }
 
     if (node->left_ != nullptr)
@@ -89,7 +89,7 @@ void TreeDraw(Node<KeyT>* const node)
 
     else if (node->left_ == nullptr)
     {
-        fprintf(graph_file, "   \"%p%s\"[shape = Mrecord, style = filled, fontcolor = \"white\", fillcolor = \"black\","
+        fprintf(graph_file, "   \"%p%s\"[shape = Mrecord, color = \"red\", style = filled, fontcolor = \"white\", fillcolor = \"black\","
                             "   label = \" <value> %s\"];\n", node, "left", "nill");
         fprintf(graph_file, "  \"%p\" -> \"%p%s\" [color = \"green\"];\n", node, node, "left");
     }
@@ -102,7 +102,7 @@ void TreeDraw(Node<KeyT>* const node)
 
     else if (node->right_ == nullptr)
     {
-        fprintf(graph_file, "   \"%p%s\"[shape = Mrecord, style = filled, fontcolor = \"white\", fillcolor = \"black\","
+        fprintf(graph_file, "   \"%p%s\"[shape = Mrecord, color = \"red\", style = filled, fontcolor = \"white\", fillcolor = \"black\","
                             "   label = \" <value> %s\"];\n", node, "right", "nill");
         fprintf(graph_file, "  \"%p\" -> \"%p%s\" [color = \"green\"];\n", node, node, "right");
     }

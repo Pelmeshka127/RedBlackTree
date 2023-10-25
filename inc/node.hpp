@@ -32,9 +32,7 @@ class Node
         
         Node<KeyT>      *parent_ = nullptr;
 
-        size_t          subtree_size_ = 0;
-
-    // Node() {}
+        size_t          subtree_size_ = 1;
 
     Node(const KeyT& key = 0, const Color& color = Black, Node<KeyT>* left = nullptr,
          Node<KeyT>* right = nullptr,  Node<KeyT>* parent = nullptr) : 
@@ -54,9 +52,47 @@ class Node
     void CopyTree(Node<KeyT>* rhs);
 
     ~Node() {};
+
+    void SizeUpdate();
+
+    void Resize();
 };
 
 //-------------------------------------------------------------------------------//
+
+template<typename KeyT>
+void Node<KeyT>::SizeUpdate()
+{
+    size_t left_size = 0, right_size = 0;
+
+    if (left_)
+        left_size = left_->subtree_size_;
+
+    if (right_)
+        right_size = right_->subtree_size_;
+
+    subtree_size_ = left_size + right_size + 1;
+}
+
+template<typename KeyT>
+void Node<KeyT>::Resize()
+{
+    if (left_)
+        left_->Resize();
+
+    if (right_)
+        right_->Resize();
+
+    size_t left_size = 0, right_size = 0;
+
+    if (left_)
+        left_size = left_->subtree_size_;
+
+    if (right_)
+        right_size = right_->subtree_size_;
+
+    subtree_size_ = left_size + right_size + 1;
+}
 
 } // end of SeacrhTree namespace
 
