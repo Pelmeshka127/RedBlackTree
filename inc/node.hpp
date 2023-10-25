@@ -53,26 +53,10 @@ class Node
 
     ~Node() {};
 
-    void SizeUpdate();
-
     void Resize();
 };
 
 //-------------------------------------------------------------------------------//
-
-template<typename KeyT>
-void Node<KeyT>::SizeUpdate()
-{
-    size_t left_size = 0, right_size = 0;
-
-    if (left_)
-        left_size = left_->subtree_size_;
-
-    if (right_)
-        right_size = right_->subtree_size_;
-
-    subtree_size_ = left_size + right_size + 1;
-}
 
 template<typename KeyT>
 void Node<KeyT>::Resize()
@@ -93,6 +77,8 @@ void Node<KeyT>::Resize()
 
     subtree_size_ = left_size + right_size + 1;
 }
+
+//-------------------------------------------------------------------------------//
 
 } // end of SeacrhTree namespace
 

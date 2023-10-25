@@ -72,13 +72,13 @@ void TreeDraw(Node<KeyT>* const node)
     if (node->color_ == Black)
     {
         fprintf(graph_file, "   \"%p\"[shape = Mrecord, color = \"red\", style = filled, fontcolor = \"white\", fillcolor = \"black\","
-                            "   label = \" <value> %d | size = %zu\"];\n", node, node->key_, node->subtree_size_);
+                            "   label = \" key = %d | size = %zu\"];\n", node, node->key_, node->subtree_size_);
     }
 
     else if (node->color_ == Red)
     {
         fprintf(graph_file, "  \"%p\"[shape = Mrecord, color = \"black\", style = filled, fillcolor = \"firebrick2\","
-                            "   label = \" <value> %d | size = %zu\"];\n", node, node->key_, node->subtree_size_);
+                            "   label = \" key = %d | size = %zu\"];\n", node, node->key_, node->subtree_size_);
     }
 
     if (node->left_ != nullptr)

@@ -8,91 +8,91 @@
 
 //-------------------------------------------------------------------------------//
 
-// int main(int argc, char** argv)
-// {
-//     using namespace SearchTree;
-
-//     RBTree<int> tree1;
-
-//     char cmd{};
-
-//     bool mode = true;
-
-//     while (mode && std::cin >> cmd)
-//     {
-//         switch (cmd)
-//         {
-//             case 'k':
-//             {
-//                 int n = 0;
-
-//                 std::cin >> n;
-
-//                 tree1.InsertKey(n);
-
-//                 break;
-//             }
-
-//             case 'q':
-//             {
-//                 int first = 0, second = 0;
-
-//                 std::cin >> first >> second;
-
-//                 std::cout << tree1.Distance(first, second);
-
-//                 break;
-//             }
-
-//             default:
-//             {
-//                 mode = false;
-//             }
-//         }
-//     }
-
-//     TreeDump(&tree1);
-
-//     return 0;
-// }
-
-//-------------------------------------------------------------------------------//
-
 int main(int argc, char** argv)
 {
     using namespace SearchTree;
 
-    RBTree<int> tree;
+    RBTree<int> tree1;
 
-    tree.InsertKey(2);
+    char cmd{};
 
-    TreeDump(&tree);
+    bool mode = true;
 
-    tree.InsertKey(1);
+    while (mode && std::cin >> cmd)
+    {
+        switch (cmd)
+        {
+            case 'k':
+            {
+                int n = 0;
 
-    TreeDump(&tree);
+                std::cin >> n;
 
-    tree.InsertKey(3);
+                tree1.InsertKey(n);
 
-    TreeDump(&tree);
+                break;
+            }
 
-    tree.InsertKey(4);
+            case 'q':
+            {
+                int first = 0, second = 0;
 
-    TreeDump(&tree);
+                std::cin >> first >> second;
 
-    tree.InsertKey(7);
+                std::cout << tree1.Distance(first, second) << std::endl;
 
-    TreeDump(&tree);
+                break;
+            }
 
-    tree.InsertKey(5);
+            default:
+            {
+                mode = false;
+            }
+        }
+    }
 
-    TreeDump(&tree);
-
-    tree.DeleteKey(3);
-
-    TreeDump(&tree);
+    TreeDump(&tree1);
 
     return 0;
 }
+
+//-------------------------------------------------------------------------------//
+
+// int main(int argc, char** argv)
+// {
+//     using namespace SearchTree;
+
+//     RBTree<int> tree;
+
+//     tree.InsertKey(2);
+
+//     TreeDump(&tree);
+
+//     tree.InsertKey(1);
+
+//     TreeDump(&tree);
+
+//     tree.InsertKey(3);
+
+//     TreeDump(&tree);
+
+//     tree.InsertKey(4);
+
+//     TreeDump(&tree);
+
+//     tree.InsertKey(7);
+
+//     TreeDump(&tree);
+
+//     tree.InsertKey(5);
+
+//     TreeDump(&tree);
+
+//     tree.DeleteKey(3);
+
+//     TreeDump(&tree);
+
+//     return 0;
+// }
 
 //-------------------------------------------------------------------------------//
