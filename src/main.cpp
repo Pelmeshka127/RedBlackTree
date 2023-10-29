@@ -8,6 +8,24 @@
 
 //-------------------------------------------------------------------------------//
 
+using KeyT = int;
+
+using CompType = int;
+
+CompType Comparator(KeyT first, KeyT second)
+{
+    if (first < second)
+        return -1;
+
+    else if (first == second)
+        return 0;
+
+    else
+        return 1;
+}
+
+//-------------------------------------------------------------------------------//
+
 int main(int argc, char** argv)
 {
     using namespace SearchTree;
