@@ -30,7 +30,7 @@ int main(int argc, char** argv)
 {
     using namespace SearchTree;
 
-    RBTree<int> tree1;
+    RBTree<KeyT, std::less<KeyT>> tree1;
 
     char cmd{};
 

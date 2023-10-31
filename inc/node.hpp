@@ -19,20 +19,26 @@ enum Color
 //-------------------------------------------------------------------------------//
 
 template<typename KeyT>
-class Node 
+class Node  
 {
-    public: 
-        KeyT            key_;
 
-        Color           color_;
-        
-        Node<KeyT>      *left_   = nullptr;
-        
-        Node<KeyT>      *right_  = nullptr;
-        
-        Node<KeyT>      *parent_ = nullptr;
+public: 
 
-        size_t          subtree_size_ = 1;
+//-------------------------------------------------------------------------------//
+
+    KeyT            key_;
+
+    Color           color_;
+    
+    Node<KeyT>      *left_   = nullptr;
+    
+    Node<KeyT>      *right_  = nullptr;
+    
+    Node<KeyT>      *parent_ = nullptr;
+
+    size_t          subtree_size_ = 1;
+
+//-------------------------------------------------------------------------------//
 
     Node(const KeyT& key = 0, const Color& color = Black, Node<KeyT>* left = nullptr,
          Node<KeyT>* right = nullptr,  Node<KeyT>* parent = nullptr) : 
@@ -41,7 +47,7 @@ class Node
         subtree_size_ = 1;
     }
 
-    Node(const Node& rhs)               = delete; // copy constructor
+    Node(const Node& rhs)               = delete;  // copy constructor
 
     Node(Node&& rhs)                    = delete; // move constructor
 
@@ -49,34 +55,32 @@ class Node
 
     Node& operator=(Node&& rhs)         = delete; // move assignment
 
-    void CopyTree(Node<KeyT>* rhs);
-
     ~Node() {};
 
-    void Resize();
-};
+    //-------------------------------------------------------------------------------//
 
-//-------------------------------------------------------------------------------//
+    void Resize()
+    {
+        if (left_)
+            left_->Resize();
 
-template<typename KeyT>
-void Node<KeyT>::Resize()
-{
-    if (left_)
-        left_->Resize();
+        if (right_)
+            right_->Resize();
 
-    if (right_)
-        right_->Resize();
+        size_t left_size = 0, right_size = 0;
 
-    size_t left_size = 0, right_size = 0;
+        if (left_)
+            left_size = left_->subtree_size_;
 
-    if (left_)
-        left_size = left_->subtree_size_;
+        if (right_)
+            right_size = right_->subtree_size_;
 
-    if (right_)
-        right_size = right_->subtree_size_;
+        subtree_size_ = left_size + right_size + 1;
+    }
 
-    subtree_size_ = left_size + right_size + 1;
-}
+    //-------------------------------------------------------------------------------//
+    
+}; // end of Node Class
 
 //-------------------------------------------------------------------------------//
 

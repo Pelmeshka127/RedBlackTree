@@ -10,26 +10,35 @@ namespace SearchTree
 
 //---------------------------Start Red Black Tree Class--------------------------//
 
-template<typename KeyT> 
+template<typename KeyT, typename Comparator = std::less<KeyT>> 
 class RBTree
 {
 
 using node_type = Node<KeyT>;
 
+//-------------------------------------------------------------------------------//
+
 private:
+
+//-------------------------------------------------------------------------------//
+
     size_t size_ = 0;
 
     node_type *root_  = nullptr;
 
+//-------------------------------------------------------------------------------//
+
 public:
+
+//-------------------------------------------------------------------------------//
 
     RBTree() {};                            // constructor
 
-    //-------------------------------Start Rule Of Five------------------------------//
+//-------------------------------Start Rule Of Five------------------------------//
 
     RBTree(const RBTree& rhs)               // copy constructor
     {
-        std::cout << "copy constructor" << std::endl;
+        // std::cout << "copy constructor" << std::endl;
 
         if (rhs.root_ == nullptr)
         {
@@ -90,11 +99,11 @@ public:
         }
     }
 
-    //-------------------------------------------------------------------------------//
+//-------------------------------------------------------------------------------//
 
     RBTree(RBTree&& rhs)                    // move constructor
     {
-        std::cout << "move constructor" << std::endl;
+        // std::cout << "move constructor" << std::endl;
 
         std::swap(root_, rhs.root_);
 
@@ -105,11 +114,11 @@ public:
         rhs.size_ = 0;
     }
 
-    //-------------------------------------------------------------------------------//
+//-------------------------------------------------------------------------------//
 
     RBTree& operator=(const RBTree& rhs)    // copy assignment
     {
-        std::cout << "copy assignment" << std::endl;
+        // std::cout << "copy assignment" << std::endl;
 
         if (this == &rhs)
             return *this;
@@ -121,11 +130,11 @@ public:
         return *this;
     }
 
-    //-------------------------------------------------------------------------------//
+//-------------------------------------------------------------------------------//
 
     RBTree& operator=(RBTree&& rhs)         // move assignment
     {
-        std::cout << "move assignment" << std::endl;
+        // std::cout << "move assignment" << std::endl;
 
         if (this == &rhs)
             return *this;
@@ -137,34 +146,34 @@ public:
         return *this;
     }
 
-    //-------------------------------------------------------------------------------//
+//-------------------------------------------------------------------------------//
 
     ~RBTree()                               // destructor
     {
-        std::cout << "Destructor" << std::endl;
+        // std::cout << "Destructor" << std::endl;
 
         CleanTree(root_);
     }
 
-    //--------------------------------End Rule Of Five-------------------------------//
+//--------------------------------End Rule Of Five-------------------------------//
 
-    //--------------------------------Start Selectors--------------------------------//
+//--------------------------------Start Selectors--------------------------------//
 
     size_t Size() const
     {
         return size_;
     }
 
-    //-------------------------------------------------------------------------------//
+//-------------------------------------------------------------------------------//
 
     node_type* Root() const
     {
         return root_;
     }
 
-    //----------------------------------End Selectors--------------------------------//
+//----------------------------------End Selectors--------------------------------//
 
-    //-----------------------------Start Tree Functions------------------------------//
+//-----------------------------Start Tree Functions------------------------------//
 
     int InsertKey(KeyT key)
     {
@@ -181,7 +190,7 @@ public:
         return Config::NoErr;
     }
 
-    //-------------------------------------------------------------------------------//
+//-------------------------------------------------------------------------------//
 
     int DeleteKey(KeyT key)
     {
@@ -193,27 +202,27 @@ public:
         return Config::NoErr;
     }
 
-    //-------------------------------------------------------------------------------//
+//-------------------------------------------------------------------------------//
 
     node_type* TreeSearch(KeyT key, node_type* root) const
     {
         if (!(root) || root->key_ == key)
             return root;
 
-        if (key < root->key_)
+        if (Comparator()(key, root->key_))
             return TreeSearch(key, root->left_);
 
-        if (key > root->key_)
+        if (Comparator()(root->key_, key))
             return TreeSearch(key, root->right_);
 
         return nullptr;
     }
 
-    //-------------------------------------------------------------------------------//
+//-------------------------------------------------------------------------------//
 
 private:
 
-    //-------------------------------------------------------------------------------//
+//-------------------------------------------------------------------------------//
 
     Node<KeyT>* TreeMinimum(node_type* node) const
     {
@@ -225,7 +234,7 @@ private:
         return x;
     }
 
-    //-------------------------------------------------------------------------------//
+//-------------------------------------------------------------------------------//
 
     Node<KeyT>* TreeMaximum(node_type* node) const
     {
@@ -237,7 +246,7 @@ private:
         return x;
     }
 
-    //-------------------------------------------------------------------------------//
+//-------------------------------------------------------------------------------//
 
     void LeftRotate(node_type* x)
     {
@@ -269,7 +278,7 @@ private:
         root_->Resize();
     }
 
-    //-------------------------------------------------------------------------------//
+//-------------------------------------------------------------------------------//
 
     void RightRotate(node_type* y)
     {
@@ -301,7 +310,7 @@ private:
         root_->Resize();
     }
 
-    //-------------------------------------------------------------------------------//
+//-------------------------------------------------------------------------------//
 
     void InsertNode(node_type* inserting_node)
     {
@@ -325,10 +334,10 @@ private:
         if (y == nullptr)
             root_ = inserting_node;
 
-        else if (inserting_node->key_ < y->key_)
+        else if (Comparator()(inserting_node->key_, y->key_))
             y->left_    = inserting_node;
 
-        else if (inserting_node->key_ > y->key_)
+        else if (Comparator()(y->key_, inserting_node->key_))
             y->right_   = inserting_node;
 
         inserting_node->color_ = Red;
@@ -340,7 +349,7 @@ private:
         root_->Resize();
     }
 
-    //-------------------------------------------------------------------------------//
+//-------------------------------------------------------------------------------//
 
     void InsertFixUp(node_type* node)
     {
@@ -351,30 +360,11 @@ private:
                 Node<KeyT>* y = node->parent_->parent_->right_;
 
                 if (y && y->color_ == Red)
-                {
-                    node->parent_->color_ = Black;
-
-                    y->color_ = Black;
-
-                    node->parent_->parent_->color_ = Red;
-
-                    node = node->parent_->parent_;
-                }
+                    InsertFixupRecolorFamily(node, y);
 
                 else
                 {
-                    if (node == node->parent_->right_)
-                    {
-                        node = node->parent_;
-
-                        LeftRotate(node);
-                    }
-
-                    node->parent_->color_ = Black;
-
-                    node->parent_->parent_->color_ = Red;
-
-                    RightRotate(node->parent_->parent_);
+                    InsertFixUpLeft(node);
 
                     break;
                 }
@@ -385,30 +375,11 @@ private:
                 Node<KeyT>* y = node->parent_->parent_->left_;
 
                 if (y && y->color_ == Red)
-                {
-                    node->parent_->color_ = Black;
-
-                    y->color_ = Black;
-
-                    node->parent_->parent_->color_ = Red;
-
-                    node = node->parent_->parent_;
-                }
+                    InsertFixupRecolorFamily(node, y);
 
                 else
                 {
-                    if (node == node->parent_->left_)
-                    {
-                        node = node->parent_;
-
-                        RightRotate(node);
-                    }
-
-                    node->parent_->color_ = Black;
-
-                    node->parent_->parent_->color_ = Red;
-
-                    LeftRotate(node->parent_->parent_);
+                    InsertFixUpRight(node);
 
                     break;
                 }
@@ -418,7 +389,56 @@ private:
         root_->color_ = Black;
     }
 
-    //-------------------------------------------------------------------------------//
+//-------------------------------------------------------------------------------//
+
+    void InsertFixupRecolorFamily(Node<KeyT>* node, Node<KeyT>* uncle)
+    {
+        node->parent_->color_ = Black;
+
+        uncle->color_ = Black;
+
+        node->parent_->parent_->color_ = Red;
+
+        node = node->parent_->parent_;
+    }
+
+//-------------------------------------------------------------------------------//
+
+    void InsertFixUpLeft(Node<KeyT>* node)
+    {
+        if (node == node->parent_->right_)
+        {
+            node = node->parent_;
+
+            LeftRotate(node);
+        }
+
+        node->parent_->color_ = Black;
+
+        node->parent_->parent_->color_ = Red;
+
+        RightRotate(node->parent_->parent_);
+    }
+
+//-------------------------------------------------------------------------------//
+
+    void InsertFixUpRight(Node<KeyT>* node)
+    {
+        if (node == node->parent_->left_)
+        {
+            node = node->parent_;
+
+            RightRotate(node);
+        }
+
+        node->parent_->color_ = Black;
+
+        node->parent_->parent_->color_ = Red;
+
+        LeftRotate(node->parent_->parent_);
+    }
+
+//-------------------------------------------------------------------------------//
 
     void Transplant(node_type* old_node, node_type* new_node)
     {
@@ -434,8 +454,8 @@ private:
         new_node->parent_ = old_node->parent_;
     }
 
-    //-------------------------------------------------------------------------------//
-    
+//-------------------------------------------------------------------------------//
+
     void DeleteNode(node_type* node)
     {
         Node<KeyT> *child = nullptr, *parent = nullptr;
@@ -499,7 +519,7 @@ private:
 
         if (node->left_)
             child = node->left_;
-    
+
         else
             child = node->right_;
 
@@ -532,7 +552,7 @@ private:
         root_->Resize();
     }
 
-    //-------------------------------------------------------------------------------//
+//-------------------------------------------------------------------------------//
 
     void DeleteFixUp(node_type* node, node_type* parent)
     {
@@ -647,7 +667,7 @@ private:
             node->color_ = Black;
     }
 
-    //-------------------------------------------------------------------------------//
+//-------------------------------------------------------------------------------//
 
     void CleanTree(node_type* node)
     {
@@ -661,11 +681,11 @@ private:
         delete node;
     }
 
-    //-------------------------------End Tree Functions------------------------------//
+//-------------------------------End Tree Functions------------------------------//
 
 public:
 
-    //--------------------------------Start Distance---------------------------------//
+//--------------------------------Start Distance---------------------------------//
 
     size_t Distance(KeyT first, KeyT second) const
     {
@@ -678,10 +698,10 @@ public:
 
         while (curr != nullptr)
         {
-            if (first < curr->key_)
+            if (Comparator()(first, curr->key_))
                 curr = curr->left_;
 
-            else if (first > curr->key_)
+            else if (Comparator()(curr->key_, first))
             {
                 if (curr->left_)
                     result -= (curr->left_->subtree_size_);
@@ -704,10 +724,10 @@ public:
 
         while (curr != nullptr)
         {
-            if (curr->key_ < second)
+            if (Comparator()(curr->key_, second))
                 curr = curr->right_;
 
-            else if (curr->key_ > second)
+            else if (Comparator()(second, curr->key_))
             {
                 if (curr->right_)
                     result -= (curr->right_->subtree_size_);
@@ -729,7 +749,7 @@ public:
         return result;
     }
 
-    //----------------------------------End Distance---------------------------------//
+//----------------------------------End Distance---------------------------------//
 
 }; //  end RBTree class
 
