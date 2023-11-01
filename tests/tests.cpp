@@ -2,7 +2,8 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include "../inc/node.hpp"
+#include "rbtree.hpp"
+#include "graphics.hpp"
 
 // g++ tests.cpp -std=c++17 -o test -lgtest -lgmock -pthread
 
