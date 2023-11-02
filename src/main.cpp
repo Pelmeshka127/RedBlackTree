@@ -8,21 +8,81 @@
 
 //-------------------------------------------------------------------------------//
 
-using KeyT = int;
+// using KeyT = int;
 
-using CompType = int;
+// using CompType = int;
 
-CompType Comparator(KeyT first, KeyT second)
-{
-    if (first < second)
-        return -1;
+// CompType Comparator(KeyT first, KeyT second)
+// {
+//     if (first < second)
+//         return -1;
 
-    else if (first == second)
-        return 0;
+//     else if (first == second)
+//         return 0;
 
-    else
-        return 1;
-}
+//     else
+//         return 1;
+// }
+
+// //-------------------------------------------------------------------------------//
+
+// int main(int argc, char** argv)
+// {
+//     using namespace SearchTree;
+
+//     RBTree<KeyT, std::less<KeyT>> tree1;
+
+//     char cmd{};
+
+//     bool mode = true;
+
+//     std::clock_t start = clock();
+
+//     while (mode && std::cin >> cmd)
+//     {
+//         switch (cmd)
+//         {
+//             case 'k':
+//             {
+//                 int n = 0;
+
+//                 std::cin >> n;
+
+//                 tree1.InsertKey(n);
+
+//                 break;
+//             }
+
+//             case 'q':
+//             {
+//                 int first = 0, second = 0;
+
+//                 std::cin >> first >> second;
+
+//                 if (first > second)
+//                     std::cout << 0 << ' ';
+
+//                 else
+//                     std::cout << tree1.Distance(first, second) << std::endl;
+
+//                 break;
+//             }
+
+//             default:
+//             {
+//                 mode = false;
+//             }
+//         }
+//     }
+
+//     std::cout << std::endl;
+    
+//     std::cout << "Total time is " << (clock() - start) / CLOCKS_PER_SEC << std::endl;
+
+//     TreeDump(&tree1);
+
+//     return 0;
+// }
 
 //-------------------------------------------------------------------------------//
 
@@ -30,87 +90,37 @@ int main(int argc, char** argv)
 {
     using namespace SearchTree;
 
-    RBTree<KeyT, std::less<KeyT>> tree1;
+    RBTree<int> tree;
 
-    char cmd{};
+    tree.InsertKey(2);
 
-    bool mode = true;
+    // TreeDump(&tree);
 
-    while (mode && std::cin >> cmd)
-    {
-        switch (cmd)
-        {
-            case 'k':
-            {
-                int n = 0;
+    tree.InsertKey(1);
 
-                std::cin >> n;
+    // TreeDump(&tree);
 
-                tree1.InsertKey(n);
+    tree.InsertKey(3);
 
-                break;
-            }
+    // TreeDump(&tree);
 
-            case 'q':
-            {
-                int first = 0, second = 0;
+    tree.InsertKey(4);
 
-                std::cin >> first >> second;
+    // TreeDump(&tree);
 
-                std::cout << tree1.Distance(first, second) << std::endl;
+    tree.InsertKey(7);
 
-                break;
-            }
+    // TreeDump(&tree);
 
-            default:
-            {
-                mode = false;
-            }
-        }
-    }
+    tree.InsertKey(5);
 
-    TreeDump(&tree1);
+    TreeDump(&tree);
+
+    tree.DeleteKey(3);
+
+    TreeDump(&tree);
 
     return 0;
 }
-
-//-------------------------------------------------------------------------------//
-
-// int main(int argc, char** argv)
-// {
-//     using namespace SearchTree;
-
-//     RBTree<int> tree;
-
-//     tree.InsertKey(2);
-
-//     TreeDump(&tree);
-
-//     tree.InsertKey(1);
-
-//     TreeDump(&tree);
-
-//     tree.InsertKey(3);
-
-//     TreeDump(&tree);
-
-//     tree.InsertKey(4);
-
-//     TreeDump(&tree);
-
-//     tree.InsertKey(7);
-
-//     TreeDump(&tree);
-
-//     tree.InsertKey(5);
-
-//     TreeDump(&tree);
-
-//     tree.DeleteKey(3);
-
-//     TreeDump(&tree);
-
-//     return 0;
-// }
 
 //-------------------------------------------------------------------------------//

@@ -565,15 +565,7 @@ private:
                 brother = parent->right_;
 
                 if (brother->color_ == Red)
-                {
-                    brother->color_ = Black;
-
-                    parent->color_ = Red;
-
-                    LeftRotate(parent);
-
-                    brother = parent->right_;
-                }
+                    DeleteFixUpRightBrotherRed(brother, parent);                
 
                 if ((brother->left_ == nullptr || brother->left_->color_ == Black) && (brother->right_ == nullptr || brother->right_->color_ == Black))
                 {
@@ -586,24 +578,7 @@ private:
 
                 else
                 {
-                    if (brother->right_ == nullptr || brother->right_->color_ == Black)
-                    {
-                        brother->left_->color_ = Black;
-
-                        brother->color_        = Red;
-
-                        RightRotate(brother);
-
-                        brother = parent->right_;
-                    }
-
-                    brother->color_         = parent->color_;
-
-                    parent->color_          = Black;
-
-                    brother->right_->color_ = Black;
-
-                    LeftRotate(parent);
+                    DeleteFixUpRightBrotherBlack(brother, parent);
 
                     node = root_;
 
@@ -616,15 +591,7 @@ private:
                 brother = parent->left_;
 
                 if (brother->color_ == Red)
-                {
-                    brother->color_ = Black;
-
-                    parent->color_  = Black;
-
-                    RightRotate(parent);
-
-                    brother = parent->left_;
-                }
+                    DeleteFixUpLeftBrotherRed(brother, parent);
 
                 if ((brother->left_ == nullptr || brother->left_->color_ == Black) && (brother->right_ == nullptr || brother->right_->color_ == Black))
                 {
@@ -637,24 +604,7 @@ private:
 
                 else
                 {
-                    if (brother->left_ == nullptr || brother->left_->color_ == Black)
-                    {
-                        brother->right_->color_ = Black;
-
-                        brother->color_ = Red;
-
-                        LeftRotate(brother);
-
-                        brother = parent->left_;
-                    }
-
-                    brother->color_ = parent->color_;
-
-                    parent->color_ = Black;
-
-                    brother->left_->color_ = Black;
-
-                    RightRotate(parent);
+                    DeleteFixUpLeftBrotherBlack(brother, parent);
 
                     node = root_;
 
@@ -665,6 +615,80 @@ private:
 
         if (node)
             node->color_ = Black;
+    }
+
+//-------------------------------------------------------------------------------//
+
+    void DeleteFixUpRightBrotherRed(node_type* brother, node_type* parent)
+    {
+        brother->color_ = Black;
+
+        parent->color_ = Red;
+
+        LeftRotate(parent);
+
+        brother = parent->right_;
+    }
+
+//-------------------------------------------------------------------------------//
+
+    void DeleteFixUpLeftBrotherRed(node_type* brother, node_type* parent)
+    {
+        brother->color_ = Black;
+
+        parent->color_ = Red;
+
+        RightRotate(parent);
+
+        brother = parent->left_;
+    }
+
+//-------------------------------------------------------------------------------//
+
+    void DeleteFixUpRightBrotherBlack(node_type* brother, node_type* parent)
+    {
+        if (brother->right_ == nullptr || brother->right_->color_ == Black)
+        {
+            brother->left_->color_ = Black;
+
+            brother->color_        = Red;
+
+            RightRotate(brother);
+
+            brother = parent->right_;
+        }
+
+        brother->color_         = parent->color_;
+
+        parent->color_          = Black;
+
+        brother->right_->color_ = Black;
+
+        LeftRotate(parent);
+    }
+
+//-------------------------------------------------------------------------------//
+
+    void DeleteFixUpLeftBrotherBlack(node_type* brother, node_type* parent)
+    {
+        if (brother->left_ == nullptr || brother->left_->color_ == Black)
+        {
+            brother->right_->color_ = Black;
+
+            brother->color_ = Red;
+
+            LeftRotate(brother);
+
+            brother = parent->left_;
+        }
+
+        brother->color_ = parent->color_;
+
+        parent->color_ = Black;
+
+        brother->left_->color_ = Black;
+
+        RightRotate(parent);
     }
 
 //-------------------------------------------------------------------------------//
