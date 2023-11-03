@@ -29,7 +29,7 @@ int TreeDump(RBTree<KeyT>* const tree)
 {
     assert(tree);
 
-    graph_file = fopen("../../graphics/graph.dot", "w");
+    graph_file = fopen("../../../graphics/graph.dot", "w");
     if (graph_file == nullptr)
     {
         std::cerr << "Failed openning graph file in " << __PRETTY_FUNCTION__ << std::endl;
@@ -55,7 +55,7 @@ int TreeDump(RBTree<KeyT>* const tree)
 
     // system("cd ../../");
 
-    sprintf(call_graph, "dot ../../graphics/graph.dot -Tpng -o ../../graphics/graph%d.png", graph_num++);
+    sprintf(call_graph, "dot ../../../graphics/graph.dot -Tpng -o ../../../graphics/graph%d.png", graph_num++);
     
     system(call_graph);
 

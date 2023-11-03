@@ -2,6 +2,6 @@ cmake_minimum_required(VERSION 3.8)
 
 project(Tests LANGUAGES CXX)
 
-add_executable(tests tests.cpp)
+add_subdirectory(./ete)
 
-target_link_libraries(tests PRIVATE ${GTEST_LIBRARIES})
+add_subdirectory(./unit)

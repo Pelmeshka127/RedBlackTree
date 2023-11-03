@@ -322,11 +322,14 @@ private:
         {
             y = x;
 
-            if (inserting_node->key_ < x->key_)
+            if (Comparator()(inserting_node->key_, x->key_))
                 x = x->left_;
 
-            else if (inserting_node->key_ > x->key_)
+            else if (Comparator()(x->key_, inserting_node->key_))
                 x = x->right_;
+
+            else
+                return;
 
             inserting_node->parent_ = y;
         }
@@ -339,6 +342,9 @@ private:
 
         else if (Comparator()(y->key_, inserting_node->key_))
             y->right_   = inserting_node;
+
+        else
+            return;
 
         inserting_node->color_ = Red;
 
