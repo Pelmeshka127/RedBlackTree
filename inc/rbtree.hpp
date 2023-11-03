@@ -366,11 +366,30 @@ private:
                 Node<KeyT>* y = node->parent_->parent_->right_;
 
                 if (y && y->color_ == Red)
-                    InsertFixupRecolorFamily(node, y);
+                {
+                    node->parent_->color_ = Black;
+
+                    y->color_ = Black;
+
+                    node->parent_->parent_->color_ = Red;
+
+                    node = node->parent_->parent_;
+                }
 
                 else
                 {
-                    InsertFixUpLeft(node);
+                    if (node == node->parent_->right_)
+                    {
+                        node = node->parent_;
+
+                        LeftRotate(node);
+                    }
+
+                    node->parent_->color_ = Black;
+
+                    node->parent_->parent_->color_ = Red;
+
+                    RightRotate(node->parent_->parent_);
 
                     break;
                 }
@@ -381,11 +400,30 @@ private:
                 Node<KeyT>* y = node->parent_->parent_->left_;
 
                 if (y && y->color_ == Red)
-                    InsertFixupRecolorFamily(node, y);
+                {
+                    node->parent_->color_ = Black;
+
+                    y->color_ = Black;
+
+                    node->parent_->parent_->color_ = Red;
+
+                    node = node->parent_->parent_;
+                }
 
                 else
                 {
-                    InsertFixUpRight(node);
+                    if (node == node->parent_->left_)
+                    {
+                        node = node->parent_;
+
+                        RightRotate(node);
+                    }
+
+                    node->parent_->color_ = Black;
+
+                    node->parent_->parent_->color_ = Red;
+
+                    LeftRotate(node->parent_->parent_);
 
                     break;
                 }
@@ -393,55 +431,6 @@ private:
         }
 
         root_->color_ = Black;
-    }
-
-//-------------------------------------------------------------------------------//
-
-    void InsertFixupRecolorFamily(Node<KeyT>* node, Node<KeyT>* uncle)
-    {
-        node->parent_->color_ = Black;
-
-        uncle->color_ = Black;
-
-        node->parent_->parent_->color_ = Red;
-
-        node = node->parent_->parent_;
-    }
-
-//-------------------------------------------------------------------------------//
-
-    void InsertFixUpLeft(Node<KeyT>* node)
-    {
-        if (node == node->parent_->right_)
-        {
-            node = node->parent_;
-
-            LeftRotate(node);
-        }
-
-        node->parent_->color_ = Black;
-
-        node->parent_->parent_->color_ = Red;
-
-        RightRotate(node->parent_->parent_);
-    }
-
-//-------------------------------------------------------------------------------//
-
-    void InsertFixUpRight(Node<KeyT>* node)
-    {
-        if (node == node->parent_->left_)
-        {
-            node = node->parent_;
-
-            RightRotate(node);
-        }
-
-        node->parent_->color_ = Black;
-
-        node->parent_->parent_->color_ = Red;
-
-        LeftRotate(node->parent_->parent_);
     }
 
 //-------------------------------------------------------------------------------//

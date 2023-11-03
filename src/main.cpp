@@ -83,31 +83,47 @@ int main(int argc, char** argv)
 
 //     RBTree<int> tree;
 
-//     tree.InsertKey(2);
-
-//     // TreeDump(&tree);
-
-//     tree.InsertKey(1);
-
-//     // TreeDump(&tree);
-
-//     tree.InsertKey(3);
-
-//     // TreeDump(&tree);
-
-//     tree.InsertKey(4);
-
-//     // TreeDump(&tree);
-
-//     tree.InsertKey(7);
-
-//     // TreeDump(&tree);
-
-//     tree.InsertKey(5);
+//     tree.InsertKey(0);
 
 //     TreeDump(&tree);
 
-//     tree.DeleteKey(3);
+//     tree.InsertKey(-9);
+
+//     TreeDump(&tree);
+
+//     tree.InsertKey(-4);
+
+//     TreeDump(&tree);
+
+//     tree.InsertKey(17);
+
+//     TreeDump(&tree);
+
+//     tree.InsertKey(-6);
+
+//     TreeDump(&tree);
+
+//     tree.InsertKey(4);
+
+//     TreeDump(&tree);
+
+//     tree.InsertKey(-16);
+
+//     TreeDump(&tree);
+
+//     tree.InsertKey(-2);
+
+//     TreeDump(&tree);
+
+//     tree.InsertKey(19);
+
+//     TreeDump(&tree);
+
+//     tree.InsertKey(15);
+
+//     TreeDump(&tree);
+
+//     tree.InsertKey(10);
 
 //     TreeDump(&tree);
 
