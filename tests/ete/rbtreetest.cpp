@@ -72,7 +72,11 @@ int main(int argc, char** argv)
 
     test_file.close();
 
-    TreeDump(&tree);
+    #ifdef TREE_DUMP
+
+        TreeDump(&tree);
+
+    #endif
 
     return 0;
 }

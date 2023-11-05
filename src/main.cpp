@@ -1,25 +1,11 @@
+#include <vector>
+
 #include "rbtree.hpp"
 #include "graphics.hpp"
 
 //-------------------------------------------------------------------------------//
 
 using KeyT = int;
-
-using CompType = int;
-
-CompType Comparator(KeyT first, KeyT second)
-{
-    if (first < second)
-        return -1;
-
-    else if (first == second)
-        return 0;
-
-    else
-        return 1;
-}
-
-//-------------------------------------------------------------------------------//
 
 int main(int argc, char** argv)
 {
@@ -29,6 +15,8 @@ int main(int argc, char** argv)
 
     char cmd{};
 
+    std::vector<KeyT> answers{};
+
     bool mode = true;
 
     while (mode && std::cin >> cmd)
@@ -37,7 +25,7 @@ int main(int argc, char** argv)
         {
             case 'k':
             {
-                int n = 0;
+                KeyT n = 0;
 
                 std::cin >> n;
 
@@ -48,15 +36,15 @@ int main(int argc, char** argv)
 
             case 'q':
             {
-                int first = 0, second = 0;
+                KeyT first = 0, second = 0;
 
                 std::cin >> first >> second;
 
                 if (first > second)
-                    std::cout << 0 << ' ';
+                    answers.push_back(0);
 
                 else
-                    std::cout << tree1.Distance(first, second) << std::endl;
+                    answers.push_back(tree1.Distance(first, second));
 
                 break;
             }
@@ -68,9 +56,16 @@ int main(int argc, char** argv)
         }
     }
 
+    for (size_t i = 0; i < answers.size(); i++)
+        std::cout << answers[i] << " ";
+
     std::cout << std::endl;
+
+    #ifdef TREE_DUMP
     
-    TreeDump(&tree1);
+        TreeDump(&tree1);
+
+    #endif
 
     return 0;
 }

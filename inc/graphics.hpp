@@ -3,8 +3,12 @@
 
 #include "rbtree.hpp"
 
+// #define TREE_DUMP
+
 namespace SearchTree
 {
+
+#ifdef TREE_DUMP
 
 //-------------------------------------------------------------------------------//
 
@@ -27,8 +31,6 @@ static int graph_num = 1;
 template<typename KeyT>
 int TreeDump(RBTree<KeyT>* const tree)
 {
-    assert(tree);
-
     graph_file = fopen("../../graphics/graph.dot", "w");
     if (graph_file == nullptr)
     {
@@ -67,8 +69,6 @@ int TreeDump(RBTree<KeyT>* const tree)
 template<typename KeyT>
 void TreeDraw(Node<KeyT>* const node)
 {
-    assert(node);
-
     if (node->color_ == Black)
     {
         fprintf(graph_file, "   \"%p\"[shape = Mrecord, color = \"red\", style = filled, fontcolor = \"white\", fillcolor = \"black\","
@@ -115,6 +115,8 @@ void TreeDraw(Node<KeyT>* const node)
 }
 
 //-------------------------------------------------------------------------------//
+
+#endif
 
 } // end of SeacrhTree namespace
 
