@@ -64,7 +64,9 @@ int main(int argc, char** argv)
     }
 
     for (int i = 0; i < answers.size(); i++)
+    {
         std::cout << answers[i] << " ";
+    }
 
     std::cout << std::endl;
     

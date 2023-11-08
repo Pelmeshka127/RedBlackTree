@@ -29,7 +29,7 @@ int main(int argc, char** argv)
 
                 std::cin >> n;
 
-                tree1.InsertKey(n);
+                tree1.Insert(n);
 
                 break;
             }

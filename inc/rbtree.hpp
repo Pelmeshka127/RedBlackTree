@@ -14,7 +14,7 @@ template<typename KeyT, typename Comparator = std::less<KeyT>>
 class RBTree
 {
 
-using node_type = Node<KeyT>;
+// using node_type = Node<KeyT>;
 
 //-------------------------------------------------------------------------------//
 
@@ -24,7 +24,7 @@ private:
 
     size_t size_ = 0;
 
-    node_type *root_  = nullptr;
+    Node<KeyT>* root_  = nullptr;
 
 //-------------------------------------------------------------------------------//
 
@@ -166,7 +166,7 @@ public:
 
 //-------------------------------------------------------------------------------//
 
-    node_type* Root() const
+    Node<KeyT>* Root() const
     {
         return root_;
     }
@@ -175,20 +175,20 @@ public:
 
 //-----------------------------Start Tree Functions------------------------------//
 
-    int InsertKey(KeyT key)
-    {
-        Node<KeyT>* inserting_node = new Node(key);
+    // int InsertKey(KeyT key)
+    // {
+    //     Node<KeyT>* inserting_node = new Node(key);
 
-        if (inserting_node == nullptr)
-        {
-            std::cerr << "Failed allocation memory for node with key " << key << " in function " << __PRETTY_FUNCTION__ << std::endl;
-            return Config::BadAlloc;
-        }
+    //     if (inserting_node == nullptr)
+    //     {
+    //         std::cerr << "Failed allocation memory for node with key " << key << " in function " << __PRETTY_FUNCTION__ << std::endl;
+    //         return Config::BadAlloc;
+    //     }
 
-        InsertNode(inserting_node);
+    //     InsertNode(inserting_node);
 
-        return Config::NoErr;
-    }
+    //     return Config::NoErr;
+    // }
 
 //-------------------------------------------------------------------------------//
 
@@ -204,7 +204,7 @@ public:
 
 //-------------------------------------------------------------------------------//
 
-    node_type* TreeSearch(KeyT key, node_type* root) const
+    Node<KeyT>* TreeSearch(KeyT key, Node<KeyT>* root) const
     {
         if (!(root) || root->key_ == key)
             return root;
@@ -224,7 +224,7 @@ private:
 
 //-------------------------------------------------------------------------------//
 
-    Node<KeyT>* TreeMinimum(node_type* node) const
+    Node<KeyT>* TreeMinimum(Node<KeyT>* node) const
     {
         Node<KeyT>* x = node;
 
@@ -236,7 +236,7 @@ private:
 
 //-------------------------------------------------------------------------------//
 
-    Node<KeyT>* TreeMaximum(node_type* node) const
+    Node<KeyT>* TreeMaximum(Node<KeyT>* node) const
     {
         Node<KeyT>* x = node;
 
@@ -248,13 +248,25 @@ private:
 
 //-------------------------------------------------------------------------------//
 
-    void LeftRotate(node_type* x)
+    void LeftRotate(Node<KeyT>* x)
     {
         if (x == nullptr || x->right_ == nullptr)
             return;
 
         Node<KeyT>* y = x->right_;
-        
+
+        y->subtree_size_ = x->subtree_size_;
+
+        size_t left_size = 0, right_size = 0;
+
+        if (y->left_)
+            left_size  = y->left_->subtree_size_;
+
+        if (x->left_)
+            right_size = x->left_->subtree_size_;
+
+        x->subtree_size_ = left_size + right_size + 1;
+
         x->right_ = y->left_;
 
         if (y->left_ != nullptr)
@@ -274,18 +286,28 @@ private:
         y->left_   = x;
         
         x->parent_ = y;
-
-        root_->Resize();
     }
 
 //-------------------------------------------------------------------------------//
 
-    void RightRotate(node_type* y)
+    void RightRotate(Node<KeyT>* y)
     {
         if (y == nullptr || y->left_ == nullptr)
             return;
 
         Node<KeyT>* x = y->left_;
+
+        x->subtree_size_ = y->subtree_size_;
+
+        size_t left_size = 0, right_size = 0;
+
+        if (x->right_)
+            left_size  = x->right_->subtree_size_;
+
+        if (y->right_)
+            right_size = y->right_->subtree_size_;
+
+        y->subtree_size_ = left_size + right_size + 1;
 
         y->left_ = x->right_;
 
@@ -306,14 +328,25 @@ private:
         x->right_  = y;
 
         y->parent_ = x;
-
-        root_->Resize();
     }
 
 //-------------------------------------------------------------------------------//
 
-    void InsertNode(node_type* inserting_node)
+public:
+
+    void Insert(KeyT key)
     {
+        if (TreeSearch(key, root_))
+            return;
+
+        Node<KeyT>* inserting_node = new Node(key);
+
+        if (inserting_node == nullptr)
+        {
+            std::cerr << "Failed allcoation memory in " << __PRETTY_FUNCTION__ << std::endl;
+            return;
+        }
+
         Node<KeyT>* x = root_;
 
         Node<KeyT>* y = nullptr;
@@ -322,17 +355,17 @@ private:
         {
             y = x;
 
+            ++y->subtree_size_;
+
             if (Comparator()(inserting_node->key_, x->key_))
                 x = x->left_;
 
             else if (Comparator()(x->key_, inserting_node->key_))
                 x = x->right_;
-
-            else
-                return;
-
-            inserting_node->parent_ = y;
         }
+
+        inserting_node->parent_ = y;
+        // }
 
         if (y == nullptr)
             root_ = inserting_node;
@@ -343,21 +376,18 @@ private:
         else if (Comparator()(y->key_, inserting_node->key_))
             y->right_   = inserting_node;
 
-        else
-            return;
-
         inserting_node->color_ = Red;
 
         size_++;
 
         InsertFixUp(inserting_node);
-
-        root_->Resize();
     }
 
 //-------------------------------------------------------------------------------//
 
-    void InsertFixUp(node_type* node)
+private:
+
+    void InsertFixUp(Node<KeyT>* node)
     {
         while (node != root_ && node->parent_->color_ == Red)
         {
@@ -435,7 +465,7 @@ private:
 
 //-------------------------------------------------------------------------------//
 
-    void Transplant(node_type* old_node, node_type* new_node)
+    void Transplant(Node<KeyT>* old_node, Node<KeyT>* new_node)
     {
         if (old_node->parent_ == nullptr)
             root_ = new_node;
@@ -451,7 +481,7 @@ private:
 
 //-------------------------------------------------------------------------------//
 
-    void DeleteNode(node_type* node)
+    void DeleteNode(Node<KeyT>* node)
     {
         Node<KeyT> *child = nullptr, *parent = nullptr;
 
@@ -549,7 +579,7 @@ private:
 
 //-------------------------------------------------------------------------------//
 
-    void DeleteFixUp(node_type* node, node_type* parent)
+    void DeleteFixUp(Node<KeyT>* node, Node<KeyT>* parent)
     {
         Node<KeyT>* brother = nullptr;
 
@@ -614,7 +644,7 @@ private:
 
 //-------------------------------------------------------------------------------//
 
-    void DeleteFixUpRightBrotherRed(node_type* brother, node_type* parent)
+    void DeleteFixUpRightBrotherRed(Node<KeyT>* brother, Node<KeyT>* parent)
     {
         brother->color_ = Black;
 
@@ -627,7 +657,7 @@ private:
 
 //-------------------------------------------------------------------------------//
 
-    void DeleteFixUpLeftBrotherRed(node_type* brother, node_type* parent)
+    void DeleteFixUpLeftBrotherRed(Node<KeyT>* brother, Node<KeyT>* parent)
     {
         brother->color_ = Black;
 
@@ -640,7 +670,7 @@ private:
 
 //-------------------------------------------------------------------------------//
 
-    void DeleteFixUpRightBrotherBlack(node_type* brother, node_type* parent)
+    void DeleteFixUpRightBrotherBlack(Node<KeyT>* brother, Node<KeyT>* parent)
     {
         if (brother->right_ == nullptr || brother->right_->color_ == Black)
         {
@@ -664,7 +694,7 @@ private:
 
 //-------------------------------------------------------------------------------//
 
-    void DeleteFixUpLeftBrotherBlack(node_type* brother, node_type* parent)
+    void DeleteFixUpLeftBrotherBlack(Node<KeyT>* brother, Node<KeyT>* parent)
     {
         if (brother->left_ == nullptr || brother->left_->color_ == Black)
         {
@@ -688,7 +718,7 @@ private:
 
 //-------------------------------------------------------------------------------//
 
-    void CleanTree(node_type* node)
+    void CleanTree(Node<KeyT>* node)
     {
         if (!node)
             return;

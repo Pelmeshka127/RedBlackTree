@@ -1,6 +1,8 @@
 #ifndef GRAPHICS_HPP_
 #define GRAPHICS_HPP_
 
+#include <fstream>
+
 #include "rbtree.hpp"
 
 // #define TREE_DUMP
@@ -22,7 +24,9 @@ void TreeDraw(Node<KeyT>* const node);
 
 //-------------------------------------------------------------------------------//
 
-static FILE* graph_file = nullptr;
+static std::ofstream graph_file;
+
+// static FILE* graph_file = nullptr;
 
 static int graph_num = 1;
 
@@ -31,33 +35,28 @@ static int graph_num = 1;
 template<typename KeyT>
 int TreeDump(RBTree<KeyT>* const tree)
 {
-    graph_file = fopen("../../graphics/graph.dot", "w");
-    if (graph_file == nullptr)
-    {
-        std::cerr << "Failed openning graph file in " << __PRETTY_FUNCTION__ << std::endl;
-        return Config::FileError; 
-    }
+    graph_file.open("../../../graphics/graph.dot");
 
-    fprintf(graph_file, "digraph Tree\n{\n");
-    fprintf(graph_file, "   rankdir = HR;\n");
-    fprintf(graph_file, "   node[fontsize=14];\n   edge[color=\"black\",fontcolor=\"blue\",fontsize=12];\n");
-    fprintf(graph_file, "   tree[shape = Mrecord, style = filled, fillcolor = \"chartreuse1\", "
-                        "label = \"My Tree | size = %zu\"];\n", tree->Size());
+    graph_file << "digraph Tree\n{\n";
+    
+    graph_file << "   rankdir = HR;\n";
+    
+    graph_file << "   node[fontsize=14];\n   edge[color=\"black\",fontcolor=\"blue\",fontsize=12];\n";
+    
+    graph_file << "   tree[shape = Mrecord, style = filled, fillcolor = \"chartreuse1\", "
+                        "label = \"My Tree | size = " << tree->Size() << "\"];\n";
+
     TreeDraw(tree->Root());
-    fprintf(graph_file, "   tree -> \"%p\" [color = \"gray0\"];\n", tree->Root());
-    fprintf(graph_file, "}");
+    
+    graph_file << "   tree -> \"" << tree->Root() << "\" [color = \"gray0\"];\n";
+    
+    graph_file << "}";
 
-    if (fclose(graph_file) == EOF)
-    {
-        std::cerr << "Failed closing graph.dot in function " << __PRETTY_FUNCTION__ << std::endl;
-        return Config::FileError;
-    }
+    graph_file.close();
 
     char call_graph[100] = " ";
 
-    // system("cd ../../");
-
-    sprintf(call_graph, "dot ../../graphics/graph.dot -Tpng -o ../../graphics/graph%d.png", graph_num++);
+    sprintf(call_graph, "dot ../../../graphics/graph.dot -Tpng -o ../../../graphics/graph%d.png", graph_num++);
     
     system(call_graph);
 
@@ -71,40 +70,44 @@ void TreeDraw(Node<KeyT>* const node)
 {
     if (node->color_ == Black)
     {
-        fprintf(graph_file, "   \"%p\"[shape = Mrecord, color = \"red\", style = filled, fontcolor = \"white\", fillcolor = \"black\","
-                            "   label = \" key = %d | size = %zu\"];\n", node, node->key_, node->subtree_size_);
+        graph_file << "   \"" << node << "\"[shape = Mrecord, color = \"red\", style = filled, fontcolor = \"white\", fillcolor = \"black\",";
+        
+        graph_file << "   label = \" key = " << node->key_ << " | size = " << node->subtree_size_ << "\"];\n";
     }
 
     else if (node->color_ == Red)
     {
-        fprintf(graph_file, "  \"%p\"[shape = Mrecord, color = \"black\", style = filled, fillcolor = \"firebrick2\","
-                            "   label = \" key = %d | size = %zu\"];\n", node, node->key_, node->subtree_size_);
+        graph_file << "   \"" << node << "\"[shape = Mrecord, color = \"black\", style = filled, fontcolor = \"black\", fillcolor = \"firebrick2\",";
+        
+        graph_file << "   label = \" key = " << node->key_ << " | size = " << node->subtree_size_ << "\"];\n";
     }
 
     if (node->left_ != nullptr)
     {
-        fprintf(graph_file, "  \"%p\" -> \"%p\" [color = \"green\"];\n", node, node->left_);
-        fprintf(graph_file, "  \"%p\" -> \"%p\" [color = \"red\"];\n", node->left_, node->left_->parent_);
+        graph_file << "  \"" << node << "\" -> \"" << node->left_ << "\" [color = \"green\"];\n";
+        
+        graph_file << "  \"" << node->left_ << "\" -> \"" << node->left_->parent_ << "\" [color = \"red\"];\n";
     }
 
     else if (node->left_ == nullptr)
     {
-        fprintf(graph_file, "   \"%p%s\"[shape = Mrecord, color = \"red\", style = filled, fontcolor = \"white\", fillcolor = \"black\","
-                            "   label = \" <value> %s\"];\n", node, "left", "nill");
-        fprintf(graph_file, "  \"%p\" -> \"%p%s\" [color = \"green\"];\n", node, node, "left");
+        graph_file << "   \"" << node << "left\"[shape = Mrecord, color = \"red\", style = filled, fontcolor = \"white\", fillcolor = \"black\"," <<
+                            "   label = \" <value> nill\"];\n";
+        graph_file << "  \"" << node << "\" -> \"" << node << "left\" [color = \"green\"];\n";
     }
 
     if (node->right_ != nullptr)
     {
-        fprintf(graph_file, "  \"%p\" -> \"%p\" [color = \"green\"];\n", node, node->right_);
-        fprintf(graph_file, "  \"%p\" -> \"%p\" [color = \"red\"];\n", node->right_, node->right_->parent_);
+        graph_file << "  \"" << node << "\" -> \"" << node->right_ << "\" [color = \"green\"];\n";
+        
+        graph_file << "  \"" << node->right_ << "\" -> \"" << node->right_->parent_ << "\" [color = \"red\"];\n";
     }
 
     else if (node->right_ == nullptr)
     {
-        fprintf(graph_file, "   \"%p%s\"[shape = Mrecord, color = \"red\", style = filled, fontcolor = \"white\", fillcolor = \"black\","
-                            "   label = \" <value> %s\"];\n", node, "right", "nill");
-        fprintf(graph_file, "  \"%p\" -> \"%p%s\" [color = \"green\"];\n", node, node, "right");
+        graph_file << "   \"" << node << "right\"[shape = Mrecord, color = \"red\", style = filled, fontcolor = \"white\", fillcolor = \"black\"," <<
+                            "   label = \" <value> nill\"];\n";
+        graph_file << "  \"" << node << "\" -> \"" << node << "right\" [color = \"green\"];\n";
     }
 
     if (node->left_ != nullptr)

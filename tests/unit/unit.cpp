@@ -9,6 +9,8 @@
 
 using namespace std;
 
+//-------------------------------------------------------------------------------//
+
 TEST(MyClassTest, init_class)
 {
     SearchTree::Node<int> node1(3, SearchTree::Black);
@@ -20,9 +22,44 @@ TEST(MyClassTest, init_class)
     ASSERT_EQ(node1.color_, node2.color_);
 }
 
+//-------------------------------------------------------------------------------//
+
+TEST(NodeSizeTest, NodeSizeTest)
+{
+    SearchTree::RBTree<int> tree;
+
+    tree.Insert(0);
+
+    tree.Insert(-9);
+
+    tree.Insert(-4);
+
+    tree.Insert(17);
+
+    tree.Insert(-6);
+
+    tree.Insert(4);
+
+    tree.Insert(-16);
+
+    tree.Insert(-2);
+
+    tree.Insert(19);
+
+    tree.Insert(15);
+
+    tree.Insert(10);
+
+    TreeDump(&tree);
+}
+
+//-------------------------------------------------------------------------------//
+
 int main(int argc, char **argv)
 {
-  ::testing::InitGoogleTest(&argc, argv);
+    ::testing::InitGoogleTest(&argc, argv);
 
-  return RUN_ALL_TESTS();
+    return RUN_ALL_TESTS();
 }
+
+//-------------------------------------------------------------------------------//
