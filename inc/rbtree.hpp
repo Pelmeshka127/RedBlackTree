@@ -14,8 +14,6 @@ template<typename KeyT, typename Comparator = std::less<KeyT>>
 class RBTree
 {
 
-// using node_type = Node<KeyT>;
-
 //-------------------------------------------------------------------------------//
 
 private:
@@ -174,23 +172,6 @@ public:
 //----------------------------------End Selectors--------------------------------//
 
 //-----------------------------Start Tree Functions------------------------------//
-
-    // int InsertKey(KeyT key)
-    // {
-    //     Node<KeyT>* inserting_node = new Node(key);
-
-    //     if (inserting_node == nullptr)
-    //     {
-    //         std::cerr << "Failed allocation memory for node with key " << key << " in function " << __PRETTY_FUNCTION__ << std::endl;
-    //         return Config::BadAlloc;
-    //     }
-
-    //     InsertNode(inserting_node);
-
-    //     return Config::NoErr;
-    // }
-
-//-------------------------------------------------------------------------------//
 
     int DeleteKey(KeyT key)
     {
