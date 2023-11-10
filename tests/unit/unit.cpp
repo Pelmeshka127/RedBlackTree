@@ -50,7 +50,11 @@ TEST(NodeSizeTest, NodeSizeTest)
 
     tree.Insert(10);
 
-    TreeDump(&tree);
+    #ifdef TREE_DUMP
+
+        TreeDump(&tree);
+
+    #endif
 }
 
 //-------------------------------------------------------------------------------//
