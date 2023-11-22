@@ -3,8 +3,6 @@
 
 #include <iostream>
 
-#include "config.hpp"
-
 namespace SearchTree
 {
 
@@ -14,6 +12,12 @@ enum Color
 {
     Red,
     Black,
+};
+
+enum Part
+{
+    Left,
+    Right,
 };
 
 //-------------------------------------------------------------------------------//

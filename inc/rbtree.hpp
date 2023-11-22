@@ -148,14 +148,16 @@ private:
     void        LeftRotate(Node<KeyT>* x);
 
     void        RightRotate(Node<KeyT>* y);
+
+    size_t      GetSubSizeRotate(const Node<KeyT>* x, const Node<KeyT>* y, const Part part);
         
     void        InsertFixUp(Node<KeyT>* node);
 
-    void        Transplant(Node<KeyT>* old_node, Node<KeyT>* new_node);
-
-    void        CleanTree(Node<KeyT>* node);
+    Node<KeyT>* SeparateFixUp(Node<KeyT>* node, const Part part);
 
     void        ReColor(Node<KeyT>* node, Node<KeyT>* uncle);
+
+    void        CleanTree(Node<KeyT>* node);
 
 public:
 
@@ -191,22 +193,11 @@ Node<KeyT>* RBTree<KeyT, Comparator>::TreeSearch(KeyT key, Node<KeyT>* root) con
 template<typename KeyT, typename Comparator>
 void RBTree<KeyT, Comparator>::LeftRotate(Node<KeyT>* x)
 {
-    if (x == nullptr || x->right_ == nullptr)
-        return;
-
     Node<KeyT>* y = x->right_;
 
     y->subtree_size_ = x->subtree_size_;
 
-    size_t left_size = 0, right_size = 0;
-
-    if (y->left_)
-        left_size  = y->left_->subtree_size_;
-
-    if (x->left_)
-        right_size = x->left_->subtree_size_;
-
-    x->subtree_size_ = left_size + right_size + 1;
+    x->subtree_size_ =  GetSubSizeRotate(x, y, Left);
 
     x->right_ = y->left_;
 
@@ -234,22 +225,11 @@ void RBTree<KeyT, Comparator>::LeftRotate(Node<KeyT>* x)
 template<typename KeyT, typename Comparator>
 void RBTree<KeyT, Comparator>::RightRotate(Node<KeyT>* y)
 {
-    if (y == nullptr || y->left_ == nullptr)
-        return;
-
     Node<KeyT>* x = y->left_;
 
     x->subtree_size_ = y->subtree_size_;
 
-    size_t left_size = 0, right_size = 0;
-
-    if (x->right_)
-        left_size  = x->right_->subtree_size_;
-
-    if (y->right_)
-        right_size = y->right_->subtree_size_;
-
-    y->subtree_size_ = left_size + right_size + 1;
+    y->subtree_size_ = GetSubSizeRotate(y, x, Right);
 
     y->left_ = x->right_;
 
@@ -270,6 +250,41 @@ void RBTree<KeyT, Comparator>::RightRotate(Node<KeyT>* y)
     x->right_  = y;
 
     y->parent_ = x;
+}
+
+//-------------------------------------------------------------------------------//
+
+template<typename KeyT, typename Comparator>
+size_t RBTree<KeyT, Comparator>::GetSubSizeRotate(const Node<KeyT>* x, const Node<KeyT>* y, const Part part)
+{
+    size_t left_size = 0, right_size = 0;
+
+    switch (part)
+    {
+        case Left:
+        {
+            if (y->left_)
+                left_size   = y->left_->subtree_size_;
+
+            if (x->left_)
+                right_size  = x->left_->subtree_size_;
+
+            break;
+        }
+
+        case Right:
+        {
+            if (y->right_)
+                left_size   = y->right_->subtree_size_;
+
+            if (x->right_)
+                right_size  = x->right_->subtree_size_;
+
+            break;
+        }
+    }
+
+    return (left_size + right_size + 1);
 }
 
 //-------------------------------------------------------------------------------//
@@ -319,62 +334,16 @@ void RBTree<KeyT, Comparator>::Insert(KeyT key)
 
 //-------------------------------------------------------------------------------//
 
-template<typename KeyT, typename Comparator>
+template<typename KeyT, typename Comparator> // new version
 void RBTree<KeyT, Comparator>::InsertFixUp(Node<KeyT>* node)
 {
     while (node != root_ && node->parent_->color_ == Red)
     {
         if (node->parent_ == node->parent_->parent_->left_)
-        {
-            Node<KeyT>* uncle = node->parent_->parent_->right_;
+            node = SeparateFixUp(node, Left);
 
-            if (uncle && uncle->color_ == Red)
-                ReColor(node, uncle);
-
-            else
-            {
-                if (node == node->parent_->right_)
-                {
-                    node = node->parent_;
-
-                    LeftRotate(node);
-                }
-
-                node->parent_->color_ = Black;
-
-                node->parent_->parent_->color_ = Red;
-
-                RightRotate(node->parent_->parent_);
-
-                break;
-            }
-        }
-
-        else
-        {
-            Node<KeyT>* uncle = node->parent_->parent_->left_;
-
-            if (uncle && uncle->color_ == Red)
-                ReColor(node, uncle);
-
-            else
-            {
-                if (node == node->parent_->left_)
-                {
-                    node = node->parent_;
-
-                    RightRotate(node);
-                }
-
-                node->parent_->color_ = Black;
-
-                node->parent_->parent_->color_ = Red;
-
-                LeftRotate(node->parent_->parent_);
-
-                break;
-            }
-        }
+        else if (node->parent_ == node->parent_->parent_->right_)
+            node = SeparateFixUp(node, Right);
     }
 
     root_->color_ = Black;
@@ -383,32 +352,58 @@ void RBTree<KeyT, Comparator>::InsertFixUp(Node<KeyT>* node)
 //-------------------------------------------------------------------------------//
 
 template<typename KeyT, typename Comparator>
-void RBTree<KeyT, Comparator>::ReColor(Node<KeyT>* node, Node<KeyT>* uncle)
+Node<KeyT>* RBTree<KeyT, Comparator>::SeparateFixUp(Node<KeyT>* node, const Part part)
 {
-    node->parent_->color_ = Black;
+    Node<KeyT>* grand = node->parent_->parent_;
 
-    uncle->color_ = Black;
+    Node<KeyT>* uncle = (part == Left) ? grand->right_ : grand->left_;
 
-    node->parent_->parent_->color_ = Red;
+    if (uncle && uncle->color_ == Red)
+    {
+        ReColor(node, uncle);
 
-    node = node->parent_->parent_;  
+        return grand;
+    }
+
+    else
+    {
+        Node<KeyT>* cur_node = (part == Left) ? node->parent_->right_ : node->parent_->left_;
+
+        if (node == cur_node)
+        {
+            node = node->parent_;
+
+            if (part == Left)
+                LeftRotate(node);
+
+            else
+                RightRotate(node);
+        }
+
+        grand->color_           = Red;
+
+        node->parent_->color_   = Black;
+
+        if (part == Left)
+            RightRotate(grand);
+
+        else
+            LeftRotate(grand);
+
+        return node;
+    }
 }
 
 //-------------------------------------------------------------------------------//
 
 template<typename KeyT, typename Comparator>
-void RBTree<KeyT, Comparator>::Transplant(Node<KeyT>* old_node, Node<KeyT>* new_node)
+void RBTree<KeyT, Comparator>::ReColor(Node<KeyT>* node, Node<KeyT>* uncle)
 {
-    if (old_node->parent_ == nullptr)
-        root_ = new_node;
+    uncle->color_                   = Black;
 
-    else if (old_node == old_node->parent_->left_)
-        old_node->parent_->left_  = new_node;
+    node->parent_->color_           = Black;
 
-    else if (old_node == old_node->parent_->right_)
-        old_node->parent_->right_ = new_node;
-
-    new_node->parent_ = old_node->parent_;
+    node->parent_->parent_->color_  = Red;
 }
 
 //-------------------------------------------------------------------------------//

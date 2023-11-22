@@ -60,7 +60,7 @@ int TreeDump(RBTree<KeyT>* const tree)
     
     system(call_graph);
 
-    return Config::NoErr;
+    return 0;
 }
 
 //-------------------------------------------------------------------------------//
