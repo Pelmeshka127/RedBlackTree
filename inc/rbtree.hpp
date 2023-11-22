@@ -8,7 +8,7 @@
 namespace SearchTree
 {
 
-//---------------------------Start Red Black Tree Class--------------------------//
+//-------------------------------------------------------------------------------//
 
 template<typename KeyT, typename Comparator = std::less<KeyT>> 
 class RBTree
@@ -28,16 +28,18 @@ private:
 
 public:
 
+    size_t      Size() const { return size_; }
+
+    Node<KeyT>* Root() const { return root_; }
+
 //-------------------------------------------------------------------------------//
 
     RBTree() {};                            // constructor
 
-//-------------------------------Start Rule Of Five------------------------------//
+//-------------------------------------------------------------------------------//
 
     RBTree(const RBTree& rhs)               // copy constructor
     {
-        // std::cout << "copy constructor" << std::endl;
-
         if (rhs.root_ == nullptr)
         {
             root_ = nullptr;
@@ -45,12 +47,6 @@ public:
         }
 
         root_ = new Node<KeyT>;
-
-        if (root_ == nullptr)
-        {
-            std::cerr << "Failed allocation memory for root_ in " << __PRETTY_FUNCTION__<< std::endl;
-            return;
-        }
 
         Node<KeyT> *copy = root_, *other = rhs.root_;
 
@@ -101,8 +97,6 @@ public:
 
     RBTree(RBTree&& rhs)                    // move constructor
     {
-        // std::cout << "move constructor" << std::endl;
-
         std::swap(root_, rhs.root_);
 
         std::swap(size_, rhs.size_);
@@ -116,8 +110,6 @@ public:
 
     RBTree& operator=(const RBTree& rhs)    // copy assignment
     {
-        // std::cout << "copy assignment" << std::endl;
-
         if (this == &rhs)
             return *this;
 
@@ -132,8 +124,6 @@ public:
 
     RBTree& operator=(RBTree&& rhs)         // move assignment
     {
-        // std::cout << "move assignment" << std::endl;
-
         if (this == &rhs)
             return *this;
 
@@ -148,640 +138,360 @@ public:
 
     ~RBTree()                               // destructor
     {
-        // std::cout << "Destructor" << std::endl;
-
         CleanTree(root_);
     }
 
-//--------------------------------End Rule Of Five-------------------------------//
-
-//--------------------------------Start Selectors--------------------------------//
-
-    size_t Size() const
-    {
-        return size_;
-    }
-
-//-------------------------------------------------------------------------------//
-
-    Node<KeyT>* Root() const
-    {
-        return root_;
-    }
-
-//----------------------------------End Selectors--------------------------------//
-
-//-----------------------------Start Tree Functions------------------------------//
-
-    int DeleteKey(KeyT key)
-    {
-        Node<KeyT>* erasing_node = TreeSearch(key, root_);
-
-        if (erasing_node)
-            DeleteNode(erasing_node);
-
-        return Config::NoErr;
-    }
-
-//-------------------------------------------------------------------------------//
-
-    Node<KeyT>* TreeSearch(KeyT key, Node<KeyT>* root) const
-    {
-        if (!(root) || root->key_ == key)
-            return root;
-
-        if (Comparator()(key, root->key_))
-            return TreeSearch(key, root->left_);
-
-        if (Comparator()(root->key_, key))
-            return TreeSearch(key, root->right_);
-
-        return nullptr;
-    }
-
 //-------------------------------------------------------------------------------//
 
 private:
 
+    void        LeftRotate(Node<KeyT>* x);
+
+    void        RightRotate(Node<KeyT>* y);
+        
+    void        InsertFixUp(Node<KeyT>* node);
+
+    void        Transplant(Node<KeyT>* old_node, Node<KeyT>* new_node);
+
+    void        CleanTree(Node<KeyT>* node);
+
+    void        ReColor(Node<KeyT>* node, Node<KeyT>* uncle);
+
+public:
+
+    Node<KeyT>* TreeSearch(KeyT key, Node<KeyT>* root) const;
+
+    void        Insert(KeyT key);
+
+    size_t      Distance(KeyT first, KeyT second) const;
+
 //-------------------------------------------------------------------------------//
 
-    Node<KeyT>* TreeMinimum(Node<KeyT>* node) const
-    {
-        Node<KeyT>* x = node;
+}; // end of RBTree class
 
-        while(x && x->left_)
+//-------------------------------------------------------------------------------//
+
+template<typename KeyT, typename Comparator> 
+Node<KeyT>* RBTree<KeyT, Comparator>::TreeSearch(KeyT key, Node<KeyT>* root) const
+{
+    if (!(root) || root->key_ == key)
+        return root;
+
+    if (Comparator()(key, root->key_))
+        return TreeSearch(key, root->left_);
+
+    if (Comparator()(root->key_, key))
+        return TreeSearch(key, root->right_);
+
+    return nullptr;
+}
+
+//-------------------------------------------------------------------------------//
+
+template<typename KeyT, typename Comparator>
+void RBTree<KeyT, Comparator>::LeftRotate(Node<KeyT>* x)
+{
+    if (x == nullptr || x->right_ == nullptr)
+        return;
+
+    Node<KeyT>* y = x->right_;
+
+    y->subtree_size_ = x->subtree_size_;
+
+    size_t left_size = 0, right_size = 0;
+
+    if (y->left_)
+        left_size  = y->left_->subtree_size_;
+
+    if (x->left_)
+        right_size = x->left_->subtree_size_;
+
+    x->subtree_size_ = left_size + right_size + 1;
+
+    x->right_ = y->left_;
+
+    if (y->left_ != nullptr)
+        y->left_->parent_ = x;
+
+    y->parent_ = x->parent_;
+
+    if (x->parent_ == nullptr)
+        root_ = y;
+
+    else if (x == x->parent_->left_)
+        x->parent_->left_  = y;
+
+    else
+        x->parent_->right_ = y;
+
+    y->left_   = x;
+    
+    x->parent_ = y;
+}
+
+//-------------------------------------------------------------------------------//
+
+template<typename KeyT, typename Comparator>
+void RBTree<KeyT, Comparator>::RightRotate(Node<KeyT>* y)
+{
+    if (y == nullptr || y->left_ == nullptr)
+        return;
+
+    Node<KeyT>* x = y->left_;
+
+    x->subtree_size_ = y->subtree_size_;
+
+    size_t left_size = 0, right_size = 0;
+
+    if (x->right_)
+        left_size  = x->right_->subtree_size_;
+
+    if (y->right_)
+        right_size = y->right_->subtree_size_;
+
+    y->subtree_size_ = left_size + right_size + 1;
+
+    y->left_ = x->right_;
+
+    if (x->right_ != nullptr)
+        x->right_->parent_ = y;
+
+    x->parent_ = y->parent_;
+
+    if (y->parent_ == nullptr)
+        root_ = x;
+
+    else if (y == y->parent_->left_)
+        y->parent_->left_  = x;
+
+    else
+        y->parent_->right_ = x;
+
+    x->right_  = y;
+
+    y->parent_ = x;
+}
+
+//-------------------------------------------------------------------------------//
+
+template<typename KeyT, typename Comparator>
+void RBTree<KeyT, Comparator>::Insert(KeyT key)
+{
+    if (TreeSearch(key, root_))
+        return;
+
+    Node<KeyT>* inserting_node = new Node(key);
+
+    Node<KeyT>* x = root_;
+
+    Node<KeyT>* y = nullptr;
+
+    while (x != nullptr)
+    {
+        y = x;
+
+        ++y->subtree_size_;
+
+        if (Comparator()(inserting_node->key_, x->key_))
             x = x->left_;
 
-        return x;
-    }
-
-//-------------------------------------------------------------------------------//
-
-    Node<KeyT>* TreeMaximum(Node<KeyT>* node) const
-    {
-        Node<KeyT>* x = node;
-
-        while(x && x->right_)
+        else if (Comparator()(x->key_, inserting_node->key_))
             x = x->right_;
-
-        return x;
     }
+
+    inserting_node->parent_ = y;
+
+    if (y == nullptr)
+        root_ = inserting_node;
+
+    else if (Comparator()(inserting_node->key_, y->key_))
+        y->left_    = inserting_node;
+
+    else if (Comparator()(y->key_, inserting_node->key_))
+        y->right_   = inserting_node;
+
+    inserting_node->color_ = Red;
+
+    size_++;
+
+    InsertFixUp(inserting_node);
+}
 
 //-------------------------------------------------------------------------------//
 
-    void LeftRotate(Node<KeyT>* x)
+template<typename KeyT, typename Comparator>
+void RBTree<KeyT, Comparator>::InsertFixUp(Node<KeyT>* node)
+{
+    while (node != root_ && node->parent_->color_ == Red)
     {
-        if (x == nullptr || x->right_ == nullptr)
-            return;
+        if (node->parent_ == node->parent_->parent_->left_)
+        {
+            Node<KeyT>* uncle = node->parent_->parent_->right_;
 
-        Node<KeyT>* y = x->right_;
+            if (uncle && uncle->color_ == Red)
+                ReColor(node, uncle);
 
-        y->subtree_size_ = x->subtree_size_;
+            else
+            {
+                if (node == node->parent_->right_)
+                {
+                    node = node->parent_;
 
-        size_t left_size = 0, right_size = 0;
+                    LeftRotate(node);
+                }
 
-        if (y->left_)
-            left_size  = y->left_->subtree_size_;
+                node->parent_->color_ = Black;
 
-        if (x->left_)
-            right_size = x->left_->subtree_size_;
+                node->parent_->parent_->color_ = Red;
 
-        x->subtree_size_ = left_size + right_size + 1;
+                RightRotate(node->parent_->parent_);
 
-        x->right_ = y->left_;
-
-        if (y->left_ != nullptr)
-            y->left_->parent_ = x;
-
-        y->parent_ = x->parent_;
-
-        if (x->parent_ == nullptr)
-            root_ = y;
-
-        else if (x == x->parent_->left_)
-            x->parent_->left_  = y;
+                break;
+            }
+        }
 
         else
-            x->parent_->right_ = y;
+        {
+            Node<KeyT>* uncle = node->parent_->parent_->left_;
 
-        y->left_   = x;
+            if (uncle && uncle->color_ == Red)
+                ReColor(node, uncle);
+
+            else
+            {
+                if (node == node->parent_->left_)
+                {
+                    node = node->parent_;
+
+                    RightRotate(node);
+                }
+
+                node->parent_->color_ = Black;
+
+                node->parent_->parent_->color_ = Red;
+
+                LeftRotate(node->parent_->parent_);
+
+                break;
+            }
+        }
+    }
+
+    root_->color_ = Black;
+}
+
+//-------------------------------------------------------------------------------//
+
+template<typename KeyT, typename Comparator>
+void RBTree<KeyT, Comparator>::ReColor(Node<KeyT>* node, Node<KeyT>* uncle)
+{
+    node->parent_->color_ = Black;
+
+    uncle->color_ = Black;
+
+    node->parent_->parent_->color_ = Red;
+
+    node = node->parent_->parent_;  
+}
+
+//-------------------------------------------------------------------------------//
+
+template<typename KeyT, typename Comparator>
+void RBTree<KeyT, Comparator>::Transplant(Node<KeyT>* old_node, Node<KeyT>* new_node)
+{
+    if (old_node->parent_ == nullptr)
+        root_ = new_node;
+
+    else if (old_node == old_node->parent_->left_)
+        old_node->parent_->left_  = new_node;
+
+    else if (old_node == old_node->parent_->right_)
+        old_node->parent_->right_ = new_node;
+
+    new_node->parent_ = old_node->parent_;
+}
+
+//-------------------------------------------------------------------------------//
+
+template<typename KeyT, typename Comparator>
+void RBTree<KeyT, Comparator>::CleanTree(Node<KeyT>* node)
+{
+    if (!node)
+        return;
+
+    CleanTree(node->left_);
+
+    CleanTree(node->right_);
+
+    delete node;
+}
+
+//-------------------------------------------------------------------------------//
+
+template<typename KeyT, typename Comparator>
+size_t RBTree<KeyT, Comparator>::Distance(KeyT first, KeyT second) const
+{
+    if (first >= second)
+        return 0;
+
+    size_t result = size_;
+
+    Node<KeyT>* curr = root_;
+
+    while (curr != nullptr)
+    {
+        if (Comparator()(first, curr->key_))
+            curr = curr->left_;
+
+        else if (Comparator()(curr->key_, first))
+        {
+            if (curr->left_)
+                result -= (curr->left_->subtree_size_);
+
+            result -= 1;
         
-        x->parent_ = y;
-    }
-
-//-------------------------------------------------------------------------------//
-
-    void RightRotate(Node<KeyT>* y)
-    {
-        if (y == nullptr || y->left_ == nullptr)
-            return;
-
-        Node<KeyT>* x = y->left_;
-
-        x->subtree_size_ = y->subtree_size_;
-
-        size_t left_size = 0, right_size = 0;
-
-        if (x->right_)
-            left_size  = x->right_->subtree_size_;
-
-        if (y->right_)
-            right_size = y->right_->subtree_size_;
-
-        y->subtree_size_ = left_size + right_size + 1;
-
-        y->left_ = x->right_;
-
-        if (x->right_ != nullptr)
-            x->right_->parent_ = y;
-
-        x->parent_ = y->parent_;
-
-        if (y->parent_ == nullptr)
-            root_ = x;
-
-        else if (y == y->parent_->left_)
-            y->parent_->left_  = x;
-
-        else
-            y->parent_->right_ = x;
-
-        x->right_  = y;
-
-        y->parent_ = x;
-    }
-
-//-------------------------------------------------------------------------------//
-
-public:
-
-    void Insert(KeyT key)
-    {
-        if (TreeSearch(key, root_))
-            return;
-
-        Node<KeyT>* inserting_node = new Node(key);
-
-        if (inserting_node == nullptr)
-        {
-            std::cerr << "Failed allcoation memory in " << __PRETTY_FUNCTION__ << std::endl;
-            return;
-        }
-
-        Node<KeyT>* x = root_;
-
-        Node<KeyT>* y = nullptr;
-
-        while (x != nullptr)
-        {
-            y = x;
-
-            ++y->subtree_size_;
-
-            if (Comparator()(inserting_node->key_, x->key_))
-                x = x->left_;
-
-            else if (Comparator()(x->key_, inserting_node->key_))
-                x = x->right_;
-        }
-
-        inserting_node->parent_ = y;
-        // }
-
-        if (y == nullptr)
-            root_ = inserting_node;
-
-        else if (Comparator()(inserting_node->key_, y->key_))
-            y->left_    = inserting_node;
-
-        else if (Comparator()(y->key_, inserting_node->key_))
-            y->right_   = inserting_node;
-
-        inserting_node->color_ = Red;
-
-        size_++;
-
-        InsertFixUp(inserting_node);
-    }
-
-//-------------------------------------------------------------------------------//
-
-private:
-
-    void InsertFixUp(Node<KeyT>* node)
-    {
-        while (node != root_ && node->parent_->color_ == Red)
-        {
-            if (node->parent_ == node->parent_->parent_->left_)
-            {
-                Node<KeyT>* y = node->parent_->parent_->right_;
-
-                if (y && y->color_ == Red)
-                {
-                    node->parent_->color_ = Black;
-
-                    y->color_ = Black;
-
-                    node->parent_->parent_->color_ = Red;
-
-                    node = node->parent_->parent_;
-                }
-
-                else
-                {
-                    if (node == node->parent_->right_)
-                    {
-                        node = node->parent_;
-
-                        LeftRotate(node);
-                    }
-
-                    node->parent_->color_ = Black;
-
-                    node->parent_->parent_->color_ = Red;
-
-                    RightRotate(node->parent_->parent_);
-
-                    break;
-                }
-            }
-
-            else
-            {
-                Node<KeyT>* y = node->parent_->parent_->left_;
-
-                if (y && y->color_ == Red)
-                {
-                    node->parent_->color_ = Black;
-
-                    y->color_ = Black;
-
-                    node->parent_->parent_->color_ = Red;
-
-                    node = node->parent_->parent_;
-                }
-
-                else
-                {
-                    if (node == node->parent_->left_)
-                    {
-                        node = node->parent_;
-
-                        RightRotate(node);
-                    }
-
-                    node->parent_->color_ = Black;
-
-                    node->parent_->parent_->color_ = Red;
-
-                    LeftRotate(node->parent_->parent_);
-
-                    break;
-                }
-            }
-        }
-
-        root_->color_ = Black;
-    }
-
-//-------------------------------------------------------------------------------//
-
-    void Transplant(Node<KeyT>* old_node, Node<KeyT>* new_node)
-    {
-        if (old_node->parent_ == nullptr)
-            root_ = new_node;
-
-        else if (old_node == old_node->parent_->left_)
-            old_node->parent_->left_  = new_node;
-
-        else if (old_node == old_node->parent_->right_)
-            old_node->parent_->right_ = new_node;
-
-        new_node->parent_ = old_node->parent_;
-    }
-
-//-------------------------------------------------------------------------------//
-
-    void DeleteNode(Node<KeyT>* node)
-    {
-        Node<KeyT> *child = nullptr, *parent = nullptr;
-
-        Color orig_color = Black;
-
-        if (node->left_ && node->right_)    
-        {
-            Node<KeyT>* replace_node = TreeMinimum(node->right_);
-
-            if (node->parent_)
-            {
-                if (node->parent_->left_ == node)
-                    node->parent_->left_ = replace_node;
-
-                else
-                    node->parent_->right_  = replace_node;
-            }
-
-            else
-                root_ = replace_node;
-
-            child       = replace_node->right_;
-
-            parent      = replace_node->parent_;
-
-            orig_color  = replace_node->color_;
-
-            if (parent == node)
-                parent = replace_node;
-
-            else
-            {
-                if (child)
-                    child->parent_ = parent;
-
-                parent->left_         = child;
-
-                replace_node->right_  = node->right_;
-
-                node->right_->parent_ = replace_node;
-            }
-
-            replace_node->parent_   = node->parent_;
-
-            replace_node->color_    = node->color_;
-
-            replace_node->left_     = node->left_;
-
-            node->left_->parent_    = replace_node;
-
-            if (orig_color == Black)
-                DeleteFixUp(child, parent);
-
-            delete node;
-
-            size_--;
-
-            return;
-        }
-
-        if (node->left_)
-            child = node->left_;
-
-        else
-            child = node->right_;
-
-        parent = node->parent_;
-
-        orig_color = node->color_;
-
-        if (child)
-            child->parent_ = parent;
-
-        if (parent)
-        {
-            if (node == parent->left_)
-                parent->left_  = child;
-
-            else if (node == parent->right_)
-                parent->right_ = child;
+            curr = curr->right_;
         }
 
         else
-            root_ = child;
-
-        if (orig_color == Black)
-            DeleteFixUp(child, parent);
-
-        delete node;
-
-        size_--;
-
-        root_->Resize();
-    }
-
-//-------------------------------------------------------------------------------//
-
-    void DeleteFixUp(Node<KeyT>* node, Node<KeyT>* parent)
-    {
-        Node<KeyT>* brother = nullptr;
-
-        while ((!node) || node->color_ == Black && node != root_)
         {
-            if (parent->left_ == node)
-            {
-                brother = parent->right_;
+            if (curr->left_)
+                result -= (curr->left_->subtree_size_);
 
-                if (brother->color_ == Red)
-                    DeleteFixUpRightBrotherRed(brother, parent);                
-
-                if ((brother->left_ == nullptr || brother->left_->color_ == Black) && (brother->right_ == nullptr || brother->right_->color_ == Black))
-                {
-                    brother->color_ = Red;
-
-                    node    = parent;
-
-                    parent  = node->parent_;
-                }
-
-                else
-                {
-                    DeleteFixUpRightBrotherBlack(brother, parent);
-
-                    node = root_;
-
-                    break;
-                }
-            }
-
-            else
-            {
-                brother = parent->left_;
-
-                if (brother->color_ == Red)
-                    DeleteFixUpLeftBrotherRed(brother, parent);
-
-                if ((brother->left_ == nullptr || brother->left_->color_ == Black) && (brother->right_ == nullptr || brother->right_->color_ == Black))
-                {
-                    brother->color_ = Red;
-
-                    node    = parent;
-
-                    parent  = node->parent_;
-                }
-
-                else
-                {
-                    DeleteFixUpLeftBrotherBlack(brother, parent);
-
-                    node = root_;
-
-                    break;
-                }
-            }
+            break;
         }
-
-        if (node)
-            node->color_ = Black;
     }
 
-//-------------------------------------------------------------------------------//
+    curr = root_;
 
-    void DeleteFixUpRightBrotherRed(Node<KeyT>* brother, Node<KeyT>* parent)
+    while (curr != nullptr)
     {
-        brother->color_ = Black;
+        if (Comparator()(curr->key_, second))
+            curr = curr->right_;
 
-        parent->color_ = Red;
-
-        LeftRotate(parent);
-
-        brother = parent->right_;
-    }
-
-//-------------------------------------------------------------------------------//
-
-    void DeleteFixUpLeftBrotherRed(Node<KeyT>* brother, Node<KeyT>* parent)
-    {
-        brother->color_ = Black;
-
-        parent->color_ = Red;
-
-        RightRotate(parent);
-
-        brother = parent->left_;
-    }
-
-//-------------------------------------------------------------------------------//
-
-    void DeleteFixUpRightBrotherBlack(Node<KeyT>* brother, Node<KeyT>* parent)
-    {
-        if (brother->right_ == nullptr || brother->right_->color_ == Black)
+        else if (Comparator()(second, curr->key_))
         {
-            brother->left_->color_ = Black;
+            if (curr->right_)
+                result -= (curr->right_->subtree_size_);
 
-            brother->color_        = Red;
-
-            RightRotate(brother);
-
-            brother = parent->right_;
-        }
-
-        brother->color_         = parent->color_;
-
-        parent->color_          = Black;
-
-        brother->right_->color_ = Black;
-
-        LeftRotate(parent);
-    }
-
-//-------------------------------------------------------------------------------//
-
-    void DeleteFixUpLeftBrotherBlack(Node<KeyT>* brother, Node<KeyT>* parent)
-    {
-        if (brother->left_ == nullptr || brother->left_->color_ == Black)
-        {
-            brother->right_->color_ = Black;
-
-            brother->color_ = Red;
-
-            LeftRotate(brother);
-
-            brother = parent->left_;
-        }
-
-        brother->color_ = parent->color_;
-
-        parent->color_ = Black;
-
-        brother->left_->color_ = Black;
-
-        RightRotate(parent);
-    }
-
-//-------------------------------------------------------------------------------//
-
-    void CleanTree(Node<KeyT>* node)
-    {
-        if (!node)
-            return;
-
-        CleanTree(node->left_);
-
-        CleanTree(node->right_);
-
-        delete node;
-    }
-
-//-------------------------------End Tree Functions------------------------------//
-
-public:
-
-//--------------------------------Start Distance---------------------------------//
-
-    size_t Distance(KeyT first, KeyT second) const
-    {
-        if (first >= second)
-            return 0;
-
-        size_t result = size_;
-
-        Node<KeyT>* curr = root_;
-
-        while (curr != nullptr)
-        {
-            if (Comparator()(first, curr->key_))
-                curr = curr->left_;
-
-            else if (Comparator()(curr->key_, first))
-            {
-                if (curr->left_)
-                    result -= (curr->left_->subtree_size_);
-
-                result -= 1;
+            result -= 1;
             
-                curr = curr->right_;
-            }
-
-            else
-            {
-                if (curr->left_)
-                    result -= (curr->left_->subtree_size_);
-
-                break;
-            }
+            curr = curr->left_;
         }
 
-        curr = root_;
-
-        while (curr != nullptr)
+        else
         {
-            if (Comparator()(curr->key_, second))
-                curr = curr->right_;
+            if (curr->right_)
+                result -= curr->right_->subtree_size_;
 
-            else if (Comparator()(second, curr->key_))
-            {
-                if (curr->right_)
-                    result -= (curr->right_->subtree_size_);
-
-                result -= 1;
-                
-                curr = curr->left_;
-            }
-
-            else
-            {
-                if (curr->right_)
-                    result -= curr->right_->subtree_size_;
-
-                break;
-            }
+            break;
         }
-
-        return result;
     }
 
-//----------------------------------End Distance---------------------------------//
+    return result;
+}
 
-}; //  end RBTree class
+//-------------------------------------------------------------------------------//
 
 } // end of SearchTree namespace
 
