@@ -48,6 +48,8 @@ public:
 
         root_ = new Node<KeyT>;
 
+        size_ = rhs.size_;
+
         Node<KeyT> *copy = root_, *other = rhs.root_;
 
         while (other)
@@ -145,27 +147,27 @@ public:
 
 private:
 
-    void        LeftRotate(Node<KeyT>* x);
+    void            LeftRotate(Node<KeyT>* x);
 
-    void        RightRotate(Node<KeyT>* y);
+    void            RightRotate(Node<KeyT>* y);
 
-    size_t      GetSubSizeRotate(const Node<KeyT>* x, const Node<KeyT>* y, const Part part);
+    size_t          GetSubSizeRotate(const Node<KeyT>* x, const Node<KeyT>* y, const Part part) const;
         
-    void        InsertFixUp(Node<KeyT>* node);
+    void            InsertFixUp(Node<KeyT>* node);
 
-    Node<KeyT>* SeparateFixUp(Node<KeyT>* node, const Part part);
+    Node<KeyT>*     SeparateFixUp(Node<KeyT>* node, const Part part);
 
-    void        ReColor(Node<KeyT>* node, Node<KeyT>* uncle);
+    void            ReColor(Node<KeyT>* node, Node<KeyT>* uncle);
 
-    void        CleanTree(Node<KeyT>* node);
+    void            CleanTree(Node<KeyT>* node);
 
 public:
 
-    Node<KeyT>* TreeSearch(KeyT key, Node<KeyT>* root) const;
+    Node<KeyT>*     TreeSearch(KeyT key, Node<KeyT>* root) const;
 
-    void        Insert(KeyT key);
+    void            Insert(KeyT key);
 
-    size_t      Distance(KeyT first, KeyT second) const;
+    size_t          Distance(KeyT first, KeyT second) const;
 
 //-------------------------------------------------------------------------------//
 
@@ -255,7 +257,7 @@ void RBTree<KeyT, Comparator>::RightRotate(Node<KeyT>* y)
 //-------------------------------------------------------------------------------//
 
 template<typename KeyT, typename Comparator>
-size_t RBTree<KeyT, Comparator>::GetSubSizeRotate(const Node<KeyT>* x, const Node<KeyT>* y, const Part part)
+size_t RBTree<KeyT, Comparator>::GetSubSizeRotate(const Node<KeyT>* x, const Node<KeyT>* y, const Part part) const
 {
     size_t left_size = 0, right_size = 0;
 
@@ -365,33 +367,30 @@ Node<KeyT>* RBTree<KeyT, Comparator>::SeparateFixUp(Node<KeyT>* node, const Part
         return grand;
     }
 
-    else
+    Node<KeyT>* cur_node = (part == Left) ? node->parent_->right_ : node->parent_->left_;
+
+    if (node == cur_node)
     {
-        Node<KeyT>* cur_node = (part == Left) ? node->parent_->right_ : node->parent_->left_;
-
-        if (node == cur_node)
-        {
-            node = node->parent_;
-
-            if (part == Left)
-                LeftRotate(node);
-
-            else
-                RightRotate(node);
-        }
-
-        grand->color_           = Red;
-
-        node->parent_->color_   = Black;
+        node = node->parent_;
 
         if (part == Left)
-            RightRotate(grand);
+            LeftRotate(node);
 
         else
-            LeftRotate(grand);
-
-        return node;
+            RightRotate(node);
     }
+
+    grand->color_           = Red;
+
+    node->parent_->color_   = Black;
+
+    if (part == Left)
+        RightRotate(grand);
+
+    else
+        LeftRotate(grand);
+
+    return node;
 }
 
 //-------------------------------------------------------------------------------//

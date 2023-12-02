@@ -60,6 +60,25 @@ TEST(NodeSizeTest, NodeSizeTest)
 
 //-------------------------------------------------------------------------------//
 
+TEST(CopyCtor, CopyCtor)
+{
+    using namespace SearchTree;
+
+    RBTree<int> tree1{};
+
+    tree1.Insert(1);
+
+    tree1.Insert(2);
+
+    tree1.Insert(3);
+
+    RBTree<int> tree2(tree1);
+
+    ASSERT_EQ(tree1.Size(), tree2.Size());
+}
+
+//-------------------------------------------------------------------------------//
+
 void EteTestRunner(const char* src, const char* ans)
 {
     ifstream test_file{};
