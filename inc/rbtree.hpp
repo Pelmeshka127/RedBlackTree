@@ -2,6 +2,7 @@
 #define RBTREE_HPP_
 
 #include <iostream>
+#include <list>
 
 #include "node.hpp"
 
@@ -23,6 +24,8 @@ private:
     size_t size_ = 0;
 
     Node<KeyT>* root_  = nullptr;
+
+    std::list<Node<KeyT>*> nodes_;
 
 //-------------------------------------------------------------------------------//
 
@@ -163,7 +166,7 @@ private:
 
 public:
 
-    Node<KeyT>*     TreeSearch(KeyT key, Node<KeyT>* root) const;
+    Node<KeyT>*     TreeSearch(KeyT key) const;
 
     void            Insert(KeyT key);
 
@@ -175,17 +178,22 @@ public:
 
 //-------------------------------------------------------------------------------//
 
-template<typename KeyT, typename Comparator> 
-Node<KeyT>* RBTree<KeyT, Comparator>::TreeSearch(KeyT key, Node<KeyT>* root) const
+template<typename KeyT, typename Comparator>
+Node<KeyT>* RBTree<KeyT, Comparator>::TreeSearch(KeyT key) const
 {
-    if (!(root) || root->key_ == key)
-        return root;
+    Node<KeyT>* cur = root_;
 
-    if (Comparator()(key, root->key_))
-        return TreeSearch(key, root->left_);
+    while (cur != nullptr)
+    {
+        if (Comparator()(key, cur->key_))
+            cur = cur->left_;
 
-    if (Comparator()(root->key_, key))
-        return TreeSearch(key, root->right_);
+        else if (Comparator()(cur->key_, key))
+            cur = cur->right_;
+
+        else
+            return cur;
+    }
 
     return nullptr;
 }
@@ -294,7 +302,7 @@ size_t RBTree<KeyT, Comparator>::GetSubSizeRotate(const Node<KeyT>* x, const Nod
 template<typename KeyT, typename Comparator>
 void RBTree<KeyT, Comparator>::Insert(KeyT key)
 {
-    if (TreeSearch(key, root_))
+    if (TreeSearch(key))
         return;
 
     Node<KeyT>* inserting_node = new Node(key);
