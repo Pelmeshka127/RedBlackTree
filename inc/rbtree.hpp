@@ -150,7 +150,7 @@ public:
 template<typename KeyT, typename Comparator>
 void RBTree<KeyT, Comparator>::CopyTree(const RBTree<KeyT, Comparator>& rhs)
 {
-    root_ = new (std::nothrow) Node<KeyT>;
+    root_ = new Node<KeyT>;
     
     assert(root_);
 
@@ -164,7 +164,7 @@ void RBTree<KeyT, Comparator>::CopyTree(const RBTree<KeyT, Comparator>& rhs)
     {
         if (copy->left_ == nullptr && other->left_)
         {
-            copy->left_ = new (std::nothrow) Node<KeyT>;
+            copy->left_ = new Node<KeyT>;
             
             assert(copy->left_);
 
@@ -179,7 +179,7 @@ void RBTree<KeyT, Comparator>::CopyTree(const RBTree<KeyT, Comparator>& rhs)
 
         else if (copy->right_ == nullptr && other->right_)
         {
-            copy->right_ = new (std::nothrow) Node<KeyT>;
+            copy->right_ = new Node<KeyT>;
             
             assert(copy->right_);
 
@@ -341,6 +341,8 @@ void RBTree<KeyT, Comparator>::Insert(KeyT key)
         return;
 
     Node<KeyT>* inserting_node = new Node(key);
+
+    assert(inserting_node);
 
     Node<KeyT>* x = root_;
 
