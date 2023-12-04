@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <list>
+#include <cassert>
 
 #include "node.hpp"
 
@@ -25,23 +26,23 @@ private:
 
     Node<KeyT>* root_  = nullptr;
 
-    std::list<Node<KeyT>*> nodes_;
+    std::list<Node<KeyT>*> nodes_;  // for simple deleting
 
 //-------------------------------------------------------------------------------//
 
 public:
 
-    size_t      Size() const { return size_; }
+    size_t      Size() const noexcept { return size_; }
 
-    Node<KeyT>* Root() const { return root_; }
-
-//-------------------------------------------------------------------------------//
-
-    RBTree() {};                            // constructor
+    Node<KeyT>* Root() const noexcept { return root_; }
 
 //-------------------------------------------------------------------------------//
 
-    RBTree(const RBTree& rhs)               // copy constructor
+    RBTree() {};                                // constructor
+
+//-------------------------------------------------------------------------------//
+
+    RBTree(const RBTree& rhs)                   // copy constructor
     {
         if (rhs.root_ == nullptr)
         {
@@ -49,62 +50,24 @@ public:
             return;
         }
 
-        root_ = new Node<KeyT>;
+        RBTree tmp;
 
-        size_ = rhs.size_;
+        tmp.CopyTree(rhs);
 
-        Node<KeyT> *copy = root_, *other = rhs.root_;
+        //----------------------//
 
-        while (other)
-        {
-            if (copy->left_ == nullptr && other->left_)
-            {
-                copy->left_ = new Node<KeyT>;
-
-                copy->left_->parent_ = copy;
-
-                copy = copy->left_;
-
-                other = other->left_;
-            }
-
-            else if (copy->right_ == nullptr && other->right_)
-            {
-                copy->right_ = new Node<KeyT>;
-
-                copy->right_->parent_ = copy;
-
-                copy = copy->right_;
-
-                other = other->right_;
-            }
-
-            else
-            {
-                copy->key_ = other->key_;
-
-                copy->color_ = other->color_;
-
-                if (copy != root_)
-                {
-                    copy = copy->parent_;
-
-                    other = other->parent_;
-                }
-
-                else
-                    break;
-            }
-        }
+        *this = std::move(tmp);
     }
 
 //-------------------------------------------------------------------------------//
 
-    RBTree(RBTree&& rhs)                    // move constructor
+    RBTree(RBTree&& rhs) noexcept                   // move constructor
     {
         std::swap(root_, rhs.root_);
 
         std::swap(size_, rhs.size_);
+
+        std::swap(nodes_, rhs.nodes_);
 
         rhs.root_ = nullptr;
 
@@ -113,12 +76,14 @@ public:
 
 //-------------------------------------------------------------------------------//
 
-    RBTree& operator=(const RBTree& rhs)    // copy assignment
+    RBTree& operator=(const RBTree& rhs)            // copy assignment
     {
         if (this == &rhs)
             return *this;
 
         RBTree tmp{rhs};
+
+        //----------------------//
 
         *this = std::move(tmp);
 
@@ -127,7 +92,7 @@ public:
 
 //-------------------------------------------------------------------------------//
 
-    RBTree& operator=(RBTree&& rhs)         // move assignment
+    RBTree& operator=(RBTree&& rhs) noexcept        // move assignment
     {
         if (this == &rhs)
             return *this;
@@ -136,12 +101,14 @@ public:
 
         std::swap(size_, rhs.size_);
 
+        std::swap(nodes_, rhs.nodes_);
+
         return *this;
     }
 
 //-------------------------------------------------------------------------------//
 
-    ~RBTree()                               // destructor
+    ~RBTree()                                       // destructor
     {
         CleanTree(root_);
     }
@@ -150,11 +117,13 @@ public:
 
 private:
 
-    void            LeftRotate(Node<KeyT>* x);
+    void            CopyTree(const RBTree<KeyT, Comparator>& rhs);
 
-    void            RightRotate(Node<KeyT>* y);
+    void            LeftRotate(Node<KeyT>* x)  noexcept;
 
-    size_t          GetSubSizeRotate(const Node<KeyT>* x, const Node<KeyT>* y, const Part part) const;
+    void            RightRotate(Node<KeyT>* y) noexcept;
+
+    size_t          GetSubSizeRotate(const Node<KeyT>* x, const Node<KeyT>* y, const Part part) const noexcept;
         
     void            InsertFixUp(Node<KeyT>* node);
 
@@ -175,6 +144,72 @@ public:
 //-------------------------------------------------------------------------------//
 
 }; // end of RBTree class
+
+//-------------------------------------------------------------------------------//
+
+template<typename KeyT, typename Comparator>
+void RBTree<KeyT, Comparator>::CopyTree(const RBTree<KeyT, Comparator>& rhs)
+{
+    root_ = new (std::nothrow) Node<KeyT>;
+    
+    assert(root_);
+
+    size_ = rhs.size_;
+
+    nodes_.push_back(root_);
+
+    Node<KeyT> *copy = root_, *other = rhs.root_;
+
+    while (other)
+    {
+        if (copy->left_ == nullptr && other->left_)
+        {
+            copy->left_ = new (std::nothrow) Node<KeyT>;
+            
+            assert(copy->left_);
+
+            copy->left_->parent_ = copy;
+
+            nodes_.push_back(copy->left_);
+
+            copy = copy->left_;
+
+            other = other->left_;
+        }
+
+        else if (copy->right_ == nullptr && other->right_)
+        {
+            copy->right_ = new (std::nothrow) Node<KeyT>;
+            
+            assert(copy->right_);
+
+            copy->right_->parent_ = copy;
+
+            nodes_.push_back(copy->right_);
+
+            copy = copy->right_;
+
+            other = other->right_;
+        }
+
+        else
+        {
+            copy->key_ = other->key_;
+
+            copy->color_ = other->color_;
+
+            if (copy != root_)
+            {
+                copy = copy->parent_;
+
+                other = other->parent_;
+            }
+
+            else
+                break;
+        }
+    }
+}
 
 //-------------------------------------------------------------------------------//
 
@@ -201,7 +236,7 @@ Node<KeyT>* RBTree<KeyT, Comparator>::TreeSearch(KeyT key) const
 //-------------------------------------------------------------------------------//
 
 template<typename KeyT, typename Comparator>
-void RBTree<KeyT, Comparator>::LeftRotate(Node<KeyT>* x)
+void RBTree<KeyT, Comparator>::LeftRotate(Node<KeyT>* x) noexcept
 {
     Node<KeyT>* y = x->right_;
 
@@ -233,7 +268,7 @@ void RBTree<KeyT, Comparator>::LeftRotate(Node<KeyT>* x)
 //-------------------------------------------------------------------------------//
 
 template<typename KeyT, typename Comparator>
-void RBTree<KeyT, Comparator>::RightRotate(Node<KeyT>* y)
+void RBTree<KeyT, Comparator>::RightRotate(Node<KeyT>* y) noexcept
 {
     Node<KeyT>* x = y->left_;
 
@@ -265,7 +300,7 @@ void RBTree<KeyT, Comparator>::RightRotate(Node<KeyT>* y)
 //-------------------------------------------------------------------------------//
 
 template<typename KeyT, typename Comparator>
-size_t RBTree<KeyT, Comparator>::GetSubSizeRotate(const Node<KeyT>* x, const Node<KeyT>* y, const Part part) const
+size_t RBTree<KeyT, Comparator>::GetSubSizeRotate(const Node<KeyT>* x, const Node<KeyT>* y, const Part part) const noexcept
 {
     size_t left_size = 0, right_size = 0;
 
@@ -338,6 +373,8 @@ void RBTree<KeyT, Comparator>::Insert(KeyT key)
     inserting_node->color_ = Red;
 
     size_++;
+
+    nodes_.push_back(inserting_node);
 
     InsertFixUp(inserting_node);
 }
@@ -418,14 +455,14 @@ void RBTree<KeyT, Comparator>::ReColor(Node<KeyT>* node, Node<KeyT>* uncle)
 template<typename KeyT, typename Comparator>
 void RBTree<KeyT, Comparator>::CleanTree(Node<KeyT>* node)
 {
-    if (!node)
-        return;
+    auto start = nodes_.begin();
 
-    CleanTree(node->left_);
+    auto end   = nodes_.end();
 
-    CleanTree(node->right_);
-
-    delete node;
+    for (auto it = start; it != end; it++)
+    {
+        delete *it;
+    }
 }
 
 //-------------------------------------------------------------------------------//
