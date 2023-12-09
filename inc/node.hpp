@@ -51,16 +51,6 @@ public:
         subtree_size_ = 1;
     }
 
-    Node(const Node& rhs)               = delete;   // copy constructor
-
-    Node(Node&& rhs)                    = delete;   // move constructor
-
-    Node& operator=(const Node& rhs)    = delete;   // copy assignment
-
-    Node& operator=(Node&& rhs)         = delete;   // move assignment
-
-    ~Node() {};
-
 }; // end of Node Class
 
 //-------------------------------------------------------------------------------//

@@ -72,7 +72,21 @@ TEST(CopyCtor, CopyCtor)
 
     tree1.Insert(3);
 
+    tree1.Insert(4);
+
+    tree1.Insert(5);
+
+    tree1.Insert(6);
+
     RBTree<int> tree2(tree1);
+
+    #ifdef TREE_DUMP
+
+        TreeDump(&tree1);
+
+        TreeDump(&tree2);
+
+    #endif
 
     ASSERT_EQ(tree1.Size(), tree2.Size());
 }
