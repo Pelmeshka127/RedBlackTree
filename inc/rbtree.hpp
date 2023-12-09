@@ -16,6 +16,7 @@ namespace SearchTree
 template<typename KeyT, typename Comparator = std::less<KeyT>> 
 class RBTree
 {
+    using node_t = Node<KeyT>;
 
 //-------------------------------------------------------------------------------//
 
@@ -25,9 +26,9 @@ private:
 
     size_t size_ = 0;
 
-    Node<KeyT>* root_  = nullptr;
+    node_t* root_  = nullptr;
 
-    std::list<Node<KeyT>> nodes_;  // for simple deleting
+    std::list<node_t> nodes_;  // for simple deleting
 
 //-------------------------------------------------------------------------------//
 
@@ -35,9 +36,7 @@ public:
 
     size_t      Size() const noexcept { return size_; }
 
-    Node<KeyT>* Root() const noexcept { return root_; }
-
-    using node_t = Node<KeyT>;
+    node_t* Root() const noexcept { return root_; }
 
 //-------------------------------------------------------------------------------//
 
@@ -120,23 +119,21 @@ private:
 
     void            CopyTree(const RBTree<KeyT, Comparator>& rhs);
 
-    void            LeftRotate(Node<KeyT>* x)  noexcept;
+    void            LeftRotate(node_t* x)  noexcept;
 
-    void            RightRotate(Node<KeyT>* y) noexcept;
+    void            RightRotate(node_t* y) noexcept;
 
-    size_t          GetSubSizeRotate(const Node<KeyT>* x, const Node<KeyT>* y, const Part part) const noexcept;
+    size_t          GetSubSizeRotate(const node_t* x, const node_t* y, const Part part) const noexcept;
         
-    void            InsertFixUp(Node<KeyT>* node);
+    void            InsertFixUp(node_t* node);
 
-    Node<KeyT>*     SeparateFixUp(Node<KeyT>* node, const Part part);
+    node_t*         SeparateFixUp(node_t* node, const Part part);
 
-    void            ReColor(Node<KeyT>* node, Node<KeyT>* uncle);
-
-    void            CleanTree(Node<KeyT>* node);
+    void            ReColor(node_t* node, node_t* uncle);
 
 public:
 
-    Node<KeyT>*     TreeSearch(KeyT key) const;
+    node_t*         TreeSearch(KeyT key) const;
 
     void            Insert(KeyT key);
 
@@ -210,7 +207,7 @@ void RBTree<KeyT, Comparator>::CopyTree(const RBTree<KeyT, Comparator>& rhs)
 template<typename KeyT, typename Comparator>
 Node<KeyT>* RBTree<KeyT, Comparator>::TreeSearch(KeyT key) const
 {
-    Node<KeyT>* cur = root_;
+    node_t* cur = root_;
 
     while (cur != nullptr)
     {
@@ -230,9 +227,9 @@ Node<KeyT>* RBTree<KeyT, Comparator>::TreeSearch(KeyT key) const
 //-------------------------------------------------------------------------------//
 
 template<typename KeyT, typename Comparator>
-void RBTree<KeyT, Comparator>::LeftRotate(Node<KeyT>* x) noexcept
+void RBTree<KeyT, Comparator>::LeftRotate(node_t* x) noexcept
 {
-    Node<KeyT>* y = x->right_;
+    node_t* y = x->right_;
 
     y->subtree_size_ = x->subtree_size_;
 
@@ -262,9 +259,9 @@ void RBTree<KeyT, Comparator>::LeftRotate(Node<KeyT>* x) noexcept
 //-------------------------------------------------------------------------------//
 
 template<typename KeyT, typename Comparator>
-void RBTree<KeyT, Comparator>::RightRotate(Node<KeyT>* y) noexcept
+void RBTree<KeyT, Comparator>::RightRotate(node_t* y) noexcept
 {
-    Node<KeyT>* x = y->left_;
+    node_t* x = y->left_;
 
     x->subtree_size_ = y->subtree_size_;
 
@@ -294,7 +291,7 @@ void RBTree<KeyT, Comparator>::RightRotate(Node<KeyT>* y) noexcept
 //-------------------------------------------------------------------------------//
 
 template<typename KeyT, typename Comparator>
-size_t RBTree<KeyT, Comparator>::GetSubSizeRotate(const Node<KeyT>* x, const Node<KeyT>* y, const Part part) const noexcept
+size_t RBTree<KeyT, Comparator>::GetSubSizeRotate(const node_t* x, const node_t* y, const Part part) const noexcept
 {
     size_t left_size = 0, right_size = 0;
 
@@ -334,9 +331,9 @@ void RBTree<KeyT, Comparator>::Insert(KeyT key)
     if (TreeSearch(key))
         return;
 
-    Node<KeyT>* x = root_;
+    node_t* x = root_;
 
-    Node<KeyT>* y = nullptr;
+    node_t* y = nullptr;
 
     while (x != nullptr)
     {
@@ -351,9 +348,9 @@ void RBTree<KeyT, Comparator>::Insert(KeyT key)
             x = x->right_;
     }
 
-    nodes_.push_back(Node<KeyT>(key));
+    nodes_.push_back(node_t(key));
 
-    Node<KeyT>* inserting_node = &nodes_.back();
+    node_t* inserting_node = &nodes_.back();
 
     inserting_node->parent_ = y;
 
@@ -376,7 +373,7 @@ void RBTree<KeyT, Comparator>::Insert(KeyT key)
 //-------------------------------------------------------------------------------//
 
 template<typename KeyT, typename Comparator>
-void RBTree<KeyT, Comparator>::InsertFixUp(Node<KeyT>* node)
+void RBTree<KeyT, Comparator>::InsertFixUp(node_t* node)
 {
     while (node != root_ && node->parent_->color_ == Red)
     {
@@ -393,11 +390,11 @@ void RBTree<KeyT, Comparator>::InsertFixUp(Node<KeyT>* node)
 //-------------------------------------------------------------------------------//
 
 template<typename KeyT, typename Comparator>
-Node<KeyT>* RBTree<KeyT, Comparator>::SeparateFixUp(Node<KeyT>* node, const Part part)
+Node<KeyT>* RBTree<KeyT, Comparator>::SeparateFixUp(node_t* node, const Part part)
 {
-    Node<KeyT>* grand = node->parent_->parent_;
+    node_t* grand = node->parent_->parent_;
 
-    Node<KeyT>* uncle = (part == Left) ? grand->right_ : grand->left_;
+    node_t* uncle = (part == Left) ? grand->right_ : grand->left_;
 
     if (uncle && uncle->color_ == Red)
     {
@@ -406,7 +403,7 @@ Node<KeyT>* RBTree<KeyT, Comparator>::SeparateFixUp(Node<KeyT>* node, const Part
         return grand;
     }
 
-    Node<KeyT>* cur_node = (part == Left) ? node->parent_->right_ : node->parent_->left_;
+    node_t* cur_node = (part == Left) ? node->parent_->right_ : node->parent_->left_;
 
     if (node == cur_node)
     {
@@ -435,7 +432,7 @@ Node<KeyT>* RBTree<KeyT, Comparator>::SeparateFixUp(Node<KeyT>* node, const Part
 //-------------------------------------------------------------------------------//
 
 template<typename KeyT, typename Comparator>
-void RBTree<KeyT, Comparator>::ReColor(Node<KeyT>* node, Node<KeyT>* uncle)
+void RBTree<KeyT, Comparator>::ReColor(node_t* node, node_t* uncle)
 {
     uncle->color_                   = Black;
 
@@ -443,21 +440,6 @@ void RBTree<KeyT, Comparator>::ReColor(Node<KeyT>* node, Node<KeyT>* uncle)
 
     node->parent_->parent_->color_  = Red;
 }
-
-//-------------------------------------------------------------------------------//
-
-// template<typename KeyT, typename Comparator>
-// void RBTree<KeyT, Comparator>::CleanTree(Node<KeyT>* node)
-// {
-//     // auto start = nodes_.begin();
-
-//     // auto end   = nodes_.end();
-
-//     // for (auto it = start; it != end; it++)
-//     // {
-//     //     delete *it;
-//     // }
-// }
 
 //-------------------------------------------------------------------------------//
 
@@ -469,7 +451,7 @@ size_t RBTree<KeyT, Comparator>::Distance(KeyT first, KeyT second) const
 
     size_t result = size_;
 
-    Node<KeyT>* curr = root_;
+    node_t* curr = root_;
 
     while (curr != nullptr)
     {
