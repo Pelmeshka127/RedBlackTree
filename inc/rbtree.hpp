@@ -28,15 +28,13 @@ private:
 
     node_t* root_  = nullptr;
 
-    std::list<node_t> nodes_;  // for simple deleting
-
 //-------------------------------------------------------------------------------//
 
 public:
 
     size_t      Size() const noexcept { return size_; }
 
-    node_t* Root() const noexcept { return root_; }
+    node_t*     Root() const noexcept { return root_; }
 
 //-------------------------------------------------------------------------------//
 
@@ -68,8 +66,6 @@ public:
         std::swap(root_, rhs.root_);
 
         std::swap(size_, rhs.size_);
-
-        std::swap(nodes_, rhs.nodes_);
 
         rhs.root_ = nullptr;
 
@@ -103,14 +99,15 @@ public:
 
         std::swap(size_, rhs.size_);
 
-        std::swap(nodes_, rhs.nodes_);
-
         return *this;
     }
 
 //-------------------------------------------------------------------------------//
 
-    ~RBTree() {}                                    // destructor
+    ~RBTree()                                       // destructor
+    {
+        CleanTree();
+    }                                    
 
 
 //-------------------------------------------------------------------------------//
@@ -119,17 +116,23 @@ private:
 
     void            CopyTree(const RBTree<KeyT, Comparator>& rhs);
 
+    void            CopyData(node_t* dst, node_t* src, const Part& part) noexcept;
+
     void            LeftRotate(node_t* x)  noexcept;
 
     void            RightRotate(node_t* y) noexcept;
 
     size_t          GetSubSizeRotate(const node_t* x, const node_t* y, const Part part) const noexcept;
+
+    void            ResizeNode(const node_t* inserting_node) const noexcept;
         
     void            InsertFixUp(node_t* node);
 
     node_t*         SeparateFixUp(node_t* node, const Part part);
 
     void            ReColor(node_t* node, node_t* uncle);
+
+    void            CleanTree();
 
 public:
 
@@ -148,9 +151,16 @@ public:
 template<typename KeyT, typename Comparator>
 void RBTree<KeyT, Comparator>::CopyTree(const RBTree<KeyT, Comparator>& rhs)
 {
-    nodes_.push_back(node_t{rhs.root_->key_});
+    root_ = new (std::nothrow) node_t(rhs.root_->key_);
 
-    root_ = &nodes_.back();
+    if (!root_)
+    {
+        std::cerr << "Failed allocation memory for copy root in " << __PRETTY_FUNCTION__ << std::endl;
+
+        throw std::bad_alloc();
+    }
+
+    root_->subtree_size_ = rhs.root_->subtree_size_;
 
     size_ = rhs.size_;
 
@@ -160,35 +170,46 @@ void RBTree<KeyT, Comparator>::CopyTree(const RBTree<KeyT, Comparator>& rhs)
     {
         if (copy->left_ == nullptr && other->left_)
         {
+            copy->left_ = new (std::nothrow) node_t;
+
+            if (!copy->left_)
+            {
+                std::cerr << "Failed allocation memory for copy left in " << __PRETTY_FUNCTION__ << std::endl;
+
+                CleanTree();
+
+                throw std::bad_alloc();
+            }
+
+            CopyData(copy, other, Left);
+            
+            copy  = copy->left_;
+
             other = other->left_;
-
-            nodes_.push_back(node_t(other->key_, other->color_, nullptr, nullptr, copy));
-
-            copy->left_ = &nodes_.back();
-
-            copy = copy->left_;
-
         }
 
         else if (copy->right_ == nullptr && other->right_)
         {
+            copy->right_ = new (std::nothrow) node_t;
+
+            if (!copy->right_)
+            {
+                std::cerr << "Failed allocation memory for copy right in " << __PRETTY_FUNCTION__ << std::endl;
+
+                CleanTree();
+
+                throw std::bad_alloc();
+            }
+
+            CopyData(copy, other, Right);
+
+            copy  = copy->right_;
+
             other = other->right_;
-
-            nodes_.push_back(node_t(other->key_, other->color_, nullptr, nullptr, copy));
-
-            copy->right_ = &nodes_.back();
-
-            copy = copy->right_;
         }
 
         else
         {
-            copy->key_ = other->key_;
-
-            copy->color_ = other->color_;
-
-            copy->subtree_size_ = other->subtree_size_;
-
             if (copy != root_)
             {
                 copy = copy->parent_;
@@ -199,6 +220,34 @@ void RBTree<KeyT, Comparator>::CopyTree(const RBTree<KeyT, Comparator>& rhs)
             else
                 break;
         }
+    }
+}
+
+//-------------------------------------------------------------------------------//
+
+template<typename KeyT, typename Comparator>
+void RBTree<KeyT, Comparator>::CopyData(node_t* dst, node_t* src, const Part& part) noexcept
+{
+    if (part == Left)
+    {
+        dst->left_->parent_        = dst;
+
+        dst->left_->key_           = src->left_->key_;
+
+        dst->left_->color_         = src->left_->color_;
+
+        dst->left_->subtree_size_  = src->left_->subtree_size_;
+    }
+
+    else
+    {
+        dst->right_->parent_        = dst;
+
+        dst->right_->key_           = src->right_->key_;
+
+        dst->right_->color_         = src->right_->color_;
+
+        dst->right_->subtree_size_  = src->right_->subtree_size_;
     }
 }
 
@@ -326,6 +375,21 @@ size_t RBTree<KeyT, Comparator>::GetSubSizeRotate(const node_t* x, const node_t*
 //-------------------------------------------------------------------------------//
 
 template<typename KeyT, typename Comparator>
+void RBTree<KeyT, Comparator>::ResizeNode(const node_t* inserting_node) const noexcept
+{
+    node_t* curr = inserting_node->parent_;
+
+    while (curr != nullptr)
+    {
+        curr->subtree_size_++;
+
+        curr = curr->parent_;
+    }
+}
+
+//-------------------------------------------------------------------------------//
+
+template<typename KeyT, typename Comparator>
 void RBTree<KeyT, Comparator>::Insert(KeyT key)
 {
     if (TreeSearch(key))
@@ -339,8 +403,6 @@ void RBTree<KeyT, Comparator>::Insert(KeyT key)
     {
         y = x;
 
-        ++y->subtree_size_;
-
         if (Comparator()(key, x->key_))
             x = x->left_;
 
@@ -348,9 +410,15 @@ void RBTree<KeyT, Comparator>::Insert(KeyT key)
             x = x->right_;
     }
 
-    nodes_.push_back(node_t(key));
+    node_t* inserting_node = new (std::nothrow) node_t(key);
 
-    node_t* inserting_node = &nodes_.back();
+    if (!inserting_node)
+    {
+        std::cerr << "Failed allocation memory for node in " << __PRETTY_FUNCTION__ << std::endl;
+        throw std::bad_alloc();
+    }
+
+    x = inserting_node;
 
     inserting_node->parent_ = y;
 
@@ -364,6 +432,8 @@ void RBTree<KeyT, Comparator>::Insert(KeyT key)
         y->right_   = inserting_node;
 
     inserting_node->color_ = Red;
+
+    ResizeNode(inserting_node);
 
     size_++;
 
@@ -439,6 +509,43 @@ void RBTree<KeyT, Comparator>::ReColor(node_t* node, node_t* uncle)
     node->parent_->color_           = Black;
 
     node->parent_->parent_->color_  = Red;
+}
+
+//-------------------------------------------------------------------------------//
+
+template<typename KeyT, typename Comparator>
+void RBTree<KeyT, Comparator>::CleanTree()
+{
+    node_t* curr = root_;
+
+    while (curr != nullptr)
+    {
+        if (curr->left_)
+            curr = curr->left_;
+
+        else if (curr->right_)
+            curr = curr->right_;
+
+        else
+        {
+            if (curr == root_)
+                break;
+            
+            node_t* parent = curr->parent_;
+
+            if (curr == parent->left_)
+                parent->left_  = nullptr;
+
+            else if (curr == parent->right_)
+                parent->right_ = nullptr;
+
+            delete curr;
+
+            curr = parent;
+        }
+    }
+    
+    delete root_;
 }
 
 //-------------------------------------------------------------------------------//
