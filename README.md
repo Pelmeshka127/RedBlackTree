@@ -55,3 +55,23 @@ cd tests/ete
 
 python3 testgen.py
 ```
+
+Для сравнения скорости работы моего дерева с std::set
+```
+cd build
+
+cd compare
+
+cmake --build .
+
+./comp
+```
+
+Или для уже скомпилированного файла ./comp:
+```
+cd compare
+
+chmod +x compare.sh
+
+./compare.sh
+```

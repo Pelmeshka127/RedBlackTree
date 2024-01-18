@@ -22,6 +22,8 @@ add_subdirectory(./src)
 
 add_subdirectory(./tests)
 
+add_subdirectory(./compare)
+
 target_include_directories(rbt PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/inc)
 
 target_include_directories(rbtreetest PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/inc)
@@ -29,3 +31,5 @@ target_include_directories(rbtreetest PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/inc)
 target_include_directories(stdsettest PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/inc)
 
 target_include_directories(unit PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/inc)
+
+target_include_directories(comp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/inc)
