@@ -140,7 +140,13 @@ public:
 
     void            Insert(KeyT key);
 
-    size_t          Distance(KeyT first, KeyT second) const;
+    size_t          Distance(const KeyT first, const KeyT second) const;
+
+    node_t*         FindByNumber(const KeyT number) const;
+
+    size_t          LessThan(const KeyT number) const;
+
+    KeyT            MinimumElement(const KeyT index) const;
 
 //-------------------------------------------------------------------------------//
 
@@ -551,7 +557,7 @@ void RBTree<KeyT, Comparator>::CleanTree()
 //-------------------------------------------------------------------------------//
 
 template<typename KeyT, typename Comparator>
-size_t RBTree<KeyT, Comparator>::Distance(KeyT first, KeyT second) const
+size_t RBTree<KeyT, Comparator>::Distance(const KeyT first, const KeyT second) const
 {
     if (first >= second)
         return 0;
@@ -611,6 +617,87 @@ size_t RBTree<KeyT, Comparator>::Distance(KeyT first, KeyT second) const
     }
 
     return result;
+}
+
+//-------------------------------------------------------------------------------//
+
+template<typename KeyT, typename Comparator>
+Node<KeyT>* RBTree<KeyT, Comparator>::FindByNumber(const KeyT number) const
+{
+    node_t* curr = root_;
+
+    while (curr != nullptr)
+    {
+        if (Comparator()(curr->key_, number))
+        {
+            if (curr->right_ && Comparator()(number, curr->right_->key_))
+                return curr;
+
+            if (curr->right_)
+                curr = curr->right_;
+
+            else
+                return curr;
+        }
+
+        else if (Comparator()(number, curr->key_))
+        {
+            if (curr->left_)
+                curr = curr->left_;
+            
+            else
+                return curr;
+        }
+
+        else
+            break;
+    }
+
+    return curr;
+}
+
+//-------------------------------------------------------------------------------//
+
+template<typename KeyT, typename Comparator>
+size_t RBTree<KeyT, Comparator>::LessThan(const KeyT number) const
+{
+    size_t count{};
+
+    node_t* target_node = FindByNumber(number);
+
+    if (target_node->right_)
+    {
+        count = size_ - target_node->right_->subtree_size_;
+        
+        if (target_node->key_ == number)
+                count -= 1;
+    }
+
+    else
+    {
+        if (target_node == target_node->parent_->left_)
+            count = 0;
+
+        else
+            count = size_ - 1;
+    }
+
+    return count;
+}
+
+//-------------------------------------------------------------------------------//
+
+template<typename KeyT, typename Comparator>
+KeyT RBTree<KeyT, Comparator>::MinimumElement(const KeyT index) const
+{
+    if (index <= 0)
+    {
+        std::cout << "Incorrect index of minimum element: " << index << std::endl;
+
+        return Error::IncorrectIndex;
+    }
+
+    return index; // // // // // // // // // // // // //
 }
 
 //-------------------------------------------------------------------------------//

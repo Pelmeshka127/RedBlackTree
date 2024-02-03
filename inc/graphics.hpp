@@ -5,7 +5,7 @@
 
 #include "rbtree.hpp"
 
-// #define TREE_DUMP
+#define TREE_DUMP
 
 namespace SearchTree
 {
@@ -14,7 +14,7 @@ namespace SearchTree
 
 //-------------------------------------------------------------------------------//
 
-template<typename KeyT>
+template<typename KeyT, typename Comparator>
 int TreeDump(RBTree<KeyT>* const tree);
 
 //-------------------------------------------------------------------------------//
@@ -26,14 +26,12 @@ void TreeDraw(Node<KeyT>* const node);
 
 static std::ofstream graph_file;
 
-// static FILE* graph_file = nullptr;
-
 static int graph_num = 1;
 
 //-------------------------------------------------------------------------------//
 
-template<typename KeyT>
-int TreeDump(RBTree<KeyT>* const tree)
+template<typename KeyT, typename Comparator>
+int TreeDump(RBTree<KeyT, Comparator>* const tree)
 {
     graph_file.open("../../../graphics/graph.dot");
 

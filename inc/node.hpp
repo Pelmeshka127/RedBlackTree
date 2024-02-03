@@ -20,6 +20,11 @@ enum Part
     Right,
 };
 
+enum Error
+{
+    IncorrectIndex = -1,
+};
+
 //-------------------------------------------------------------------------------//
 
 template<typename KeyT>
