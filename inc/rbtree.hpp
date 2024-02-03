@@ -665,21 +665,31 @@ size_t RBTree<KeyT, Comparator>::LessThan(const KeyT number) const
 
     node_t* target_node = FindByNumber(number);
 
-    if (target_node->right_)
-    {
-        count = size_ - target_node->right_->subtree_size_;
-        
-        if (target_node->key_ == number)
-                count -= 1;
-    }
+    node_t* curr = root_;
 
-    else
+    while (curr != nullptr)
     {
-        if (target_node == target_node->parent_->left_)
-            count = 0;
+        if (Comparator()(number, curr->key_))
+            curr = curr->left_;
+
+        else if (Comparator()(curr->key_, number))
+        {
+            if (curr->left_)
+                count += (curr->left_->subtree_size_ + 1);
+
+            else
+                count += 1;
+
+            curr = curr->right_;
+        }
 
         else
-            count = size_ - 1;
+        {
+            if (curr->left_)
+                count += curr->left_->subtree_size_;
+            
+            break;
+        }
     }
 
     return count;
