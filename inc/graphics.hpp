@@ -5,7 +5,7 @@
 
 #include "rbtree.hpp"
 
-#define TREE_DUMP
+// #define TREE_DUMP
 
 namespace SearchTree
 {
