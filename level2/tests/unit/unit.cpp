@@ -145,6 +145,13 @@ TEST(EteTest, test7)
 
 //-------------------------------------------------------------------------------//
 
+TEST(EteTest, test8)
+{
+    EteTestRunner("../../../tests/ete/008.dat", "../../../tests/ete/008.answer");
+}
+
+//-------------------------------------------------------------------------------//
+
 int main(int argc, char **argv)
 {
     ::testing::InitGoogleTest(&argc, argv);

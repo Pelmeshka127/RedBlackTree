@@ -676,7 +676,7 @@ KeyT RBTree<KeyT, Comparator>::MinimumElement(const int index) const
         return curr->key_;
     }
 
-    else if (index == size_)
+    else if (index >= size_)
     {
         while (curr->right_)
             curr = curr->right_;

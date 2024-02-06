@@ -41,6 +41,10 @@ int main()
 
                 answers.push_back(tree.MinimumElement(index));
 
+                // TreeDump(&tree);
+
+                // std::cout << answers[answers.size() - 1] << std::endl;
+
                 break;
             }
 
@@ -51,6 +55,10 @@ int main()
                 std::cin >> number;
 
                 answers.push_back(static_cast<KeyT>(tree.LessThan(number)));
+
+                // TreeDump(&tree);
+
+                // std::cout << answers[answers.size() - 1] << std::endl;
 
                 break;
             }
