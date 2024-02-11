@@ -73,11 +73,11 @@ int main()
     for (size_t i = 0; i < answers.size(); i++)
         std::cout << answers[i] << " ";
 
-#ifdef TREE_DUMP
+// #ifdef TREE_DUMP
 
-    TreeDump(&tree);
+//     TreeDump(&tree);
 
-#endif
+// #endif
 
     std::cout << std::endl;
 
