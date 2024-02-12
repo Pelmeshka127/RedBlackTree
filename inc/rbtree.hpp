@@ -660,11 +660,15 @@ template<typename KeyT, typename Comparator>
 KeyT RBTree<KeyT, Comparator>::MinimumElement(const int index) const
 {
     if (size_ == 0)
+    {
+        std::cerr << "Tree is empty" << std::endl;
+
         return Error::IncorrectIndex;
+    }
 
     if (index <= 0)
     {
-        std::cout << "Incorrect index of minimum element: " << index << std::endl;
+        std::cerr << "Incorrect index of minimum element: " << index << std::endl;
 
         return Error::IncorrectIndex;
     }
