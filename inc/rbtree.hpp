@@ -645,8 +645,8 @@ size_t RBTree<KeyT, Comparator>::LessThan(const KeyT number) const
         else
         {
             if (curr->left_)
-                count += curr->left_->subtree_size_;
-            
+                count += (curr->left_->subtree_size_);
+
             break;
         }
     }

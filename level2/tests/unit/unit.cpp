@@ -98,56 +98,56 @@ void EteTestRunner(const char* src, const char* ans)
 
 TEST(EteTest, test1)
 {
-    EteTestRunner("../../../tests/ete/001.dat", "../../../tests/ete/001.answer");
+    EteTestRunner("../../../../level2/tests/ete/001.dat", "../../../../level2/tests/ete/001.answer");
 }
 
 //-------------------------------------------------------------------------------//
 
 TEST(EteTest, test2)
 {
-    EteTestRunner("../../../tests/ete/002.dat", "../../../tests/ete/002.answer");
+    EteTestRunner("../../../../level2/tests/ete/002.dat", "../../../../level2/tests/ete/002.answer");
 }
 
 //-------------------------------------------------------------------------------//
 
 TEST(EteTest, test3)
 {
-    EteTestRunner("../../../tests/ete/003.dat", "../../../tests/ete/003.answer");
+    EteTestRunner("../../../../level2/tests/ete/003.dat", "../../../../level2/tests/ete/003.answer");
 }
 
 //-------------------------------------------------------------------------------//
 
 TEST(EteTest, test4)
 {
-    EteTestRunner("../../../tests/ete/004.dat", "../../../tests/ete/004.answer");
+    EteTestRunner("../../../../level2/tests/ete/004.dat", "../../../../level2/tests/ete/004.answer");
 }
 
 //-------------------------------------------------------------------------------//
 
 TEST(EteTest, test5)
 {
-    EteTestRunner("../../../tests/ete/005.dat", "../../../tests/ete/005.answer");
+    EteTestRunner("../../../../level2/tests/ete/005.dat", "../../../../level2/tests/ete/005.answer");
 }
 
 //-------------------------------------------------------------------------------//
 
 TEST(EteTest, test6)
 {
-    EteTestRunner("../../../tests/ete/006.dat", "../../../tests/ete/006.answer");
+    EteTestRunner("../../../../level2/tests/ete/006.dat", "../../../../level2/tests/ete/006.answer");
 }
 
 //-------------------------------------------------------------------------------//
 
 TEST(EteTest, test7)
 {
-    EteTestRunner("../../../tests/ete/007.dat", "../../../tests/ete/007.answer");
+    EteTestRunner("../../../../level2/tests/ete/007.dat", "../../../../level2/tests/ete/007.answer");
 }
 
 //-------------------------------------------------------------------------------//
 
 TEST(EteTest, test8)
 {
-    EteTestRunner("../../../tests/ete/008.dat", "../../../tests/ete/008.answer");
+    EteTestRunner("../../../../level2/tests/ete/008.dat", "../../../../level2/tests/ete/008.answer");
 }
 
 //-------------------------------------------------------------------------------//

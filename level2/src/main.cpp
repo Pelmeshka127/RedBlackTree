@@ -30,6 +30,8 @@ int main()
 
                 tree.Insert(n);
 
+                // TreeDump(&tree);
+
                 break;
             }
 
@@ -40,8 +42,6 @@ int main()
                 std::cin >> index;
 
                 answers.push_back(tree.MinimumElement(index));
-
-                // TreeDump(&tree);
 
                 // std::cout << answers[answers.size() - 1] << std::endl;
 
@@ -56,8 +56,6 @@ int main()
 
                 answers.push_back(static_cast<KeyT>(tree.LessThan(number)));
 
-                // TreeDump(&tree);
-
                 // std::cout << answers[answers.size() - 1] << std::endl;
 
                 break;
@@ -70,14 +68,16 @@ int main()
         }
     }
 
-    for (size_t i = 0; i < answers.size(); i++)
+    for (size_t i = 0; i < answers.size() - 1; i++)
         std::cout << answers[i] << " ";
 
-// #ifdef TREE_DUMP
+    std::cout << answers[answers.size() - 1];
 
-//     TreeDump(&tree);
+#ifdef TREE_DUMP
 
-// #endif
+    TreeDump(&tree);
+
+#endif
 
     std::cout << std::endl;
 
