@@ -63,21 +63,25 @@ int main()
 
             default:
             {
+                std::cerr << "Incorrect command: " << cmd << std::endl;
                 mode = false;
             }
         }
     }
 
-    for (size_t i = 0; i < answers.size() - 1; i++)
-        std::cout << answers[i] << " ";
+    if (answers.size())
+    {
+        for (size_t i = 0; i < answers.size() - 1; i++)
+            std::cout << answers[i] << " ";
 
-    std::cout << answers[answers.size() - 1];
+        std::cout << answers[answers.size() - 1];
+    }
 
-#ifdef TREE_DUMP
+// #ifdef TREE_DUMP
 
-    TreeDump(&tree);
+//     TreeDump(&tree);
 
-#endif
+// #endif
 
     std::cout << std::endl;
 
