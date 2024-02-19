@@ -40,7 +40,7 @@ cmake --build .
 ./unit1
 ```
 
-Для запуска end to end тестов на дерево и std::set
+Для запуска end to end тестов на дерево
 ```
 cmake -B build
 
@@ -48,7 +48,7 @@ cd build/level1/tests/ete
 
 cmake --build .
 
-./rbtreetest1 <test> (or) ./stdsettest1 <test>
+./ete1 <test>
 ```
 
 Для генерации тестов нужен python3
@@ -66,7 +66,7 @@ cd level1/compare
 
 cmake --build .
 
-./comp
+./comp1
 ```
 
 Или для уже скомпилированного файла ./comp:
@@ -131,4 +131,15 @@ cmake --build .
 cd level2/tests/ete
 
 python3 testgen.py
+```
+
+Для сравнения скорости работы моего дерева с std::set
+```
+cd build
+
+cd level2/compare
+
+cmake --build .
+
+./comp2
 ```

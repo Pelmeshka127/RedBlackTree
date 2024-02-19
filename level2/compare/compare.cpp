@@ -36,27 +36,41 @@ int main(int argc, char** argv)
                 break;
             }
 
-            case 'q':
+            case 'm':
             {
-                data.push_back('q');
+                data.push_back('m');
 
-                KeyT first = 0, second = 0;
+                KeyT m = 0;
+                
+                std::cin >> m;
 
-                std::cin >> first >> second;
+                data.push_back(m);
 
-                data.push_back(first);
+                break;
+            }
 
-                data.push_back(second);
+            case 'n':
+            {
+                data.push_back('n');
+
+                KeyT m = 0;
+                
+                std::cin >> m;
+
+                data.push_back(m);
 
                 break;
             }
 
             default:
             {
+                std::cerr << "Inocorrect command: " << cmd << std::endl;
                 mode = false;
             }
         }
     }
+
+    std::cout << data.size() << std::endl;
 
     clock_t start_time = clock();
 
@@ -77,12 +91,18 @@ int main(int argc, char** argv)
             tree1.Insert(*elem);
         }
 
-        else if (*elem == 'q')
+        else if (*elem == 'm')
         {
-            if (*(elem + 2) >= *(elem + 1))
-                answers_tree.push_back(tree1.Distance(*(elem + 1), *(elem + 2)));
+            elem++;
 
-            elem += 2;
+            answers_tree.push_back(tree1.MinimumElement(*elem));
+        }
+
+        else if (*elem == 'n')
+        {
+            elem++;
+
+            answers_tree.push_back(tree1.LessThan(*elem));
         }
     }
 
@@ -110,12 +130,26 @@ int main(int argc, char** argv)
             set_tree.insert(*elem);
         }
 
-        else if (*elem == 'q')
+        else if (*elem == 'm')
         {
-            if (*(elem + 2) >= *(elem + 1))
-                answers_set.push_back(std::distance(set_tree.lower_bound(*(elem + 1)), set_tree.upper_bound(*(elem + 2))));
+            elem++;
 
-            elem += 2;
+            if (tree1.Size())
+            {
+                if (*elem <= set_tree.size())
+                    answers_set.push_back(*std::next(set_tree.begin(), *elem - 1));
+
+                else
+                    answers_set.push_back(*set_tree.cend());
+
+            }
+        }
+
+        else if (*elem == 'n')
+        {
+            elem++;
+
+            answers_set.push_back(std::distance(set_tree.begin(), set_tree.lower_bound(*elem)));
         }
     }
 

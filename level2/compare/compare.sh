@@ -5,6 +5,6 @@ echo -e "${GREEN}Comparing has started!${NC}"
 echo
 for file in ../tests/ete/*.dat; do
     printf "%s\n" $file
-    ../../build/level1/compare/comp1 < $file
+    ../../build/level2/compare/comp2 < $file
     printf "\n" 
 done
